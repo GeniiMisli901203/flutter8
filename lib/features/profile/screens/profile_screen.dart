@@ -1,7 +1,8 @@
 // lib/features/profile/screens/profile_screen.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import '../../../shared/widgets/app_state_provider.dart';
+import 'package:flutter5/service_locator.dart';
+
 import '../../../state/app_state.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -9,7 +10,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = AppStateProvider.of(context).appState;
+    // Получаем AppState из DI контейнера
+    final appState = getIt<AppState>();
     final profile = appState.studentProfile;
 
     return Scaffold(

@@ -1,6 +1,7 @@
 // lib/features/news/screens/news_screen.dart
 import 'package:flutter/material.dart';
-import '../../../shared/widgets/app_state_provider.dart';
+import 'package:flutter5/service_locator.dart';
+import '../../../state/app_state.dart';
 import '../models/news_item.dart';
 import '../widgets/add_news_screen.dart';
 
@@ -10,7 +11,8 @@ class NewsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = AppStateProvider.of(context).appState;
+    // Получаем AppState из DI контейнера
+    final appState = getIt<AppState>();
     final news = appState.news;
 
     return Scaffold(

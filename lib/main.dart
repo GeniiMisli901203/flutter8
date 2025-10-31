@@ -1,34 +1,34 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter5/shared/widgets/router.dart';
-import 'package:flutter5/shared/widgets/app_state_provider.dart';
-import 'state/app_state.dart';
+import 'package:flutter5/state/app_state.dart';
+import 'service_locator.dart';
 
 void main() {
-  final appState = AppState();
+  // Инициализируем DI контейнер
+  setupServiceLocator();
+
+  // Получаем AppState из контейнера
+  final appState = getIt<AppState>();
   final router = AppRouter(appState)..init();
 
-  runApp(MyApp(appState: appState, router: router));
+  runApp(MyApp(router: router));
 }
 
 class MyApp extends StatelessWidget {
-  final AppState appState;
   final AppRouter router;
 
-  const MyApp({required this.appState, required this.router, Key? key}) : super(key: key);
+  const MyApp({required this.router, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return AppStateProvider(
-      appState: appState,
-      child: MaterialApp.router(
-        title: 'Школьное расписание',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        routerConfig: router.router,
+    return MaterialApp.router(
+      title: 'Школьное расписание',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      routerConfig: router.router,
     );
   }
 }

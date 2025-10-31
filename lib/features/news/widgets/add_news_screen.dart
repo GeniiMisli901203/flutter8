@@ -1,7 +1,7 @@
 // lib/features/news/screens/add_news_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter5/service_locator.dart';
 import '../../../state/app_state.dart';
-import '../../../shared/widgets/app_state_provider.dart';
 import '../models/news_item.dart';
 
 class AddNewsScreen extends StatefulWidget {
@@ -17,18 +17,11 @@ class _AddNewsScreenState extends State<AddNewsScreen> {
   final _contentController = TextEditingController();
   final _urlController = TextEditingController();
 
-  AppState get _appState => AppStateProvider.of(context).appState;
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _contentController.dispose();
-    _urlController.dispose();
-    super.dispose();
-  }
-
   void _saveNews() {
     if (_formKey.currentState!.validate()) {
+      // Получаем AppState из DI контейнера
+      final appState = getIt<AppState>();
+
       final newNews = NewsItem(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
@@ -37,9 +30,17 @@ class _AddNewsScreenState extends State<AddNewsScreen> {
         date: DateTime.now(),
       );
 
-      _appState.addNewsToBeginning(newNews);
+      appState.addNewsToBeginning(newNews);
       Navigator.of(context).pop();
     }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    _urlController.dispose();
+    super.dispose();
   }
 
   @override

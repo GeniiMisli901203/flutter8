@@ -1,6 +1,6 @@
 // lib/features/schedule/screens/schedule_screen.dart
 import 'package:flutter/material.dart';
-import '../../../shared/widgets/app_state_provider.dart';
+import 'package:flutter5/service_locator.dart';
 import '../../../state/app_state.dart';
 import '../models/lesson.dart';
 import 'lesson_detail_screen.dart';
@@ -15,47 +15,45 @@ class ScheduleScreen extends StatefulWidget {
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
   late int _currentSelectedDay;
-  late AppState _appState;
 
   @override
   void initState() {
     super.initState();
-    // Не используем context в initState!
-    _currentSelectedDay = 0; // Устанавливаем значение по умолчанию
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Получаем AppState здесь, а не в initState
-    _appState = AppStateProvider.of(context).appState;
-    _currentSelectedDay = _appState.selectedDay;
+    // Получаем начальное состояние из DI контейнера
+    final appState = getIt<AppState>();
+    _currentSelectedDay = appState.selectedDay;
   }
 
   void _handleDaySelected(int dayIndex) {
     setState(() {
       _currentSelectedDay = dayIndex;
     });
-    _appState.setDay(dayIndex);
+    // Изменяем состояние через DI контейнер
+    final appState = getIt<AppState>();
+    appState.setDay(dayIndex);
   }
 
   void _showLessonDetails(BuildContext context, Lesson lesson) {
+    final appState = getIt<AppState>();
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LessonDetailScreen(
           lesson: lesson,
-          onEdit: _appState.updateLesson,
-          onDelete: _appState.deleteLesson,
+          onEdit: appState.updateLesson,
+          onDelete: appState.deleteLesson,
         ),
       ),
     );
   }
 
   void _addNewLesson(BuildContext context) {
+    final appState = getIt<AppState>();
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LessonEditScreen(
-          onSave: _appState.addLesson,
+          onSave: appState.addLesson,
           onSuccess: () {
             print('Урок успешно добавлен');
           },
@@ -66,11 +64,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Получаем AppState из DI контейнера
+    final appState = getIt<AppState>();
     final days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница'];
     final shortDays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ'];
 
     // Фильтруем уроки для выбранного дня
-    final filteredLessons = _appState.lessonsForSelectedDay;
+    final filteredLessons = appState.lessonsForSelectedDay;
 
     return Scaffold(
       appBar: AppBar(

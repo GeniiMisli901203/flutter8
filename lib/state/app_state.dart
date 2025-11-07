@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mobx/mobx.dart';
 import '../features/schedule/models/lesson.dart';
 import '../features/news/models/news_item.dart';
+
+part 'app_state.g.dart';
 
 enum AppScreen { news, schedule, profile }
 
@@ -18,14 +21,36 @@ class StudentProfile {
     required this.phoneNumber,
     required this.avatarUrl,
   });
+
+  StudentProfile copyWith({
+    String? name,
+    String? className,
+    String? email,
+    String? phoneNumber,
+    String? avatarUrl,
+  }) {
+    return StudentProfile(
+      name: name ?? this.name,
+      className: className ?? this.className,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+    );
+  }
 }
 
-class AppState extends ChangeNotifier {
-  AppScreen _currentScreen = AppScreen.schedule;
-  int _selectedDay = 0;
+// MobX Store
+class AppState = AppStateBase with _$AppState;
 
-  // Список новостей
-  List<NewsItem> _news = [
+abstract class AppStateBase with Store {
+  @observable
+  AppScreen currentScreen = AppScreen.schedule;
+
+  @observable
+  int selectedDay = 0;
+
+  @observable
+  ObservableList<NewsItem> news = ObservableList.of([
     NewsItem(
       id: '1',
       title: 'Важное объявление',
@@ -54,12 +79,12 @@ class AppState extends ChangeNotifier {
       url: '',
       date: DateTime.now(),
     ),
-  ];
+  ]);
 
-  // Список уроков для каждого дня недели
-  List<List<Lesson>> _lessonsByDay = [
+  @observable
+  ObservableList<ObservableList<Lesson>> lessonsByDay = ObservableList.of([
     // Понедельник
-    [
+    ObservableList.of([
       Lesson(
         id: '1',
         title: 'Математика',
@@ -82,20 +107,9 @@ class AppState extends ChangeNotifier {
         materials: 'Учебник, тетрадь, хрестоматия',
         dayOfWeek: 0,
       ),
-      Lesson(
-        id: '3',
-        title: 'Физика',
-        time: '11:00-11:45',
-        teacher: 'Сидоров П.К.',
-        room: '103',
-        description: 'Механика. Тема: Законы Ньютона.',
-        homework: 'Решить задачи на стр. 78-80',
-        materials: 'Учебник, тетрадь, лабораторное оборудование',
-        dayOfWeek: 0,
-      ),
-    ],
+    ]),
     // Вторник
-    [
+    ObservableList.of([
       Lesson(
         id: '4',
         title: 'История',
@@ -107,31 +121,9 @@ class AppState extends ChangeNotifier {
         materials: 'Учебник, атлас, контурные карты',
         dayOfWeek: 1,
       ),
-      Lesson(
-        id: '5',
-        title: 'Химия',
-        time: '10:00-10:45',
-        teacher: 'Васильева О.П.',
-        room: '105',
-        description: 'Общая химия. Тема: Периодическая система химических элементов.',
-        homework: 'Учебник: стр. 56-59, № 10-15',
-        materials: 'Учебник, тетрадь, таблица Менделеева',
-        dayOfWeek: 1,
-      ),
-      Lesson(
-        id: '6',
-        title: 'Английский язык',
-        time: '11:00-11:45',
-        teacher: 'Смирнова Е.А.',
-        room: '106',
-        description: 'Грамматика. Тема: Времена группы Perfect.',
-        homework: 'Учебник: стр. 89-92, упражнения 1-5',
-        materials: 'Учебник, тетрадь, словарь',
-        dayOfWeek: 1,
-      ),
-    ],
+    ]),
     // Среда
-    [
+    ObservableList.of([
       Lesson(
         id: '7',
         title: 'Биология',
@@ -143,31 +135,9 @@ class AppState extends ChangeNotifier {
         materials: 'Учебник, тетрадь, гербарий',
         dayOfWeek: 2,
       ),
-      Lesson(
-        id: '8',
-        title: 'География',
-        time: '10:00-10:45',
-        teacher: 'Михайлов И.Г.',
-        room: '108',
-        description: 'Физическая география. Тема: Климатические пояса Земли.',
-        homework: 'Подготовить сообщение о климате Африки',
-        materials: 'Учебник, атлас, контурные карты',
-        dayOfWeek: 2,
-      ),
-      Lesson(
-        id: '9',
-        title: 'Физкультура',
-        time: '11:00-11:45',
-        teacher: 'Алексеев В.С.',
-        room: 'Спортивный зал',
-        description: 'Общая физическая подготовка. Тема: Легкая атлетика.',
-        homework: 'Тренировка на выносливость',
-        materials: 'Спортивная форма, кроссовки',
-        dayOfWeek: 2,
-      ),
-    ],
+    ]),
     // Четверг
-    [
+    ObservableList.of([
       Lesson(
         id: '10',
         title: 'Информатика',
@@ -179,20 +149,9 @@ class AppState extends ChangeNotifier {
         materials: 'Компьютер, тетрадь',
         dayOfWeek: 3,
       ),
-      Lesson(
-        id: '11',
-        title: 'Русский язык',
-        time: '10:00-10:45',
-        teacher: 'Федорова Н.М.',
-        room: '110',
-        description: 'Синтаксис и пунктуация. Тема: Сложноподчиненные предложения.',
-        homework: 'Учебник: стр. 112-115, упражнения 200-205',
-        materials: 'Учебник, тетрадь',
-        dayOfWeek: 3,
-      ),
-    ],
+    ]),
     // Пятница
-    [
+    ObservableList.of([
       Lesson(
         id: '12',
         title: 'Обществознание',
@@ -204,103 +163,105 @@ class AppState extends ChangeNotifier {
         materials: 'Учебник, тетрадь, Конституция РФ',
         dayOfWeek: 4,
       ),
-      Lesson(
-        id: '13',
-        title: 'ИЗО',
-        time: '10:00-10:45',
-        teacher: 'Григорьева А.С.',
-        room: '112',
-        description: 'Рисование. Тема: Натюрморт.',
-        homework: 'Нарисовать натюрморт с натуры',
-        materials: 'Альбом, карандаши, краски',
-        dayOfWeek: 4,
-      ),
-    ],
-  ];
+    ]),
+  ]);
 
-  StudentProfile _studentProfile = StudentProfile(
+  @observable
+  StudentProfile studentProfile = StudentProfile(
     name: 'Иван Иванов',
     className: '9А',
     email: 'ivanov@school123.ru',
     phoneNumber: '+7 (999) 123-45-67',
-    avatarUrl:
-    'https://example.com/avatar.jpg', // Замените на реальный URL аватара
+    avatarUrl: 'https://example.com/avatar.jpg',
   );
 
-  AppScreen get currentScreen => _currentScreen;
-  int get selectedDay => _selectedDay;
-  List<NewsItem> get news => _news;
-  List<Lesson> get allLessons => _lessonsByDay.expand((dayLessons) => dayLessons).toList();
+  // Computed свойства
+  @computed
+  List<Lesson> get allLessons => lessonsByDay.expand((dayLessons) => dayLessons).toList();
 
-// Получаем уроки для выбранного дня
-  List<Lesson> get lessonsForSelectedDay => _lessonsByDay[_selectedDay];
-  StudentProfile get studentProfile => _studentProfile;
+  @computed
+  List<Lesson> get lessonsForSelectedDay => lessonsByDay[selectedDay];
 
+  // Actions
+  @action
   void setScreen(AppScreen screen) {
-    if (_currentScreen != screen) {
-      _currentScreen = screen;
-      notifyListeners();
-    }
+    currentScreen = screen;
   }
 
+  @action
   void setDay(int day) {
-    if (_selectedDay != day) {
-      _selectedDay = day;
-      notifyListeners();
-    }
+    selectedDay = day;
   }
 
+  @action
   void addNewsToBeginning(NewsItem newsItem) {
-    _news.insert(0, newsItem);
-    notifyListeners();
+    news.insert(0, newsItem);
   }
 
+  @action
   void removeNews(String id) {
-    _news.removeWhere((news) => news.id == id);
-    notifyListeners();
+    news.removeWhere((news) => news.id == id);
   }
 
+  @action
   void addNews(NewsItem newsItem) {
-    _news.insert(0, newsItem);
-    notifyListeners();
+    news.insert(0, newsItem);
   }
 
-  // Методы для работы с уроками
+  @action
   void addLesson(Lesson lesson) {
     final day = lesson.dayOfWeek.clamp(0, 4);
-    _lessonsByDay[day].add(lesson);
+    lessonsByDay[day].add(lesson);
     _sortLessonsByTime(day);
-    notifyListeners();
   }
 
+  @action
   void updateLesson(Lesson updatedLesson) {
     final day = updatedLesson.dayOfWeek.clamp(0, 4);
 
-    // Если день изменился, перемещаем урок
     if (_isEditingDifferentDay(updatedLesson)) {
       _moveLessonToDifferentDay(updatedLesson);
     } else {
-      // Обновляем урок в том же дне
-      final index = _lessonsByDay[day].indexWhere((lesson) => lesson.id == updatedLesson.id);
+      final index = lessonsByDay[day].indexWhere((lesson) => lesson.id == updatedLesson.id);
       if (index != -1) {
-        _lessonsByDay[day][index] = updatedLesson;
+        lessonsByDay[day][index] = updatedLesson;
         _sortLessonsByTime(day);
       }
     }
-    notifyListeners();
   }
 
+  @action
   void deleteLesson(String lessonId) {
-    for (int day = 0; day < _lessonsByDay.length; day++) {
-      _lessonsByDay[day].removeWhere((lesson) => lesson.id == lessonId);
+    for (int day = 0; day < lessonsByDay.length; day++) {
+      lessonsByDay[day].removeWhere((lesson) => lesson.id == lessonId);
     }
-    notifyListeners();
   }
 
+  @action
+  void removeLesson(String id) {
+    deleteLesson(id);
+  }
+
+  @action
+  void updateStudentProfile({
+    String? name,
+    String? className,
+    String? email,
+    String? phoneNumber,
+  }) {
+    studentProfile = studentProfile.copyWith(
+      name: name,
+      className: className,
+      email: email,
+      phoneNumber: phoneNumber,
+    );
+  }
+
+  // Вспомогательные методы
   bool _isEditingDifferentDay(Lesson updatedLesson) {
-    for (int day = 0; day < _lessonsByDay.length; day++) {
-      final existingLessonIndex = _lessonsByDay[day].indexWhere((lesson) => lesson.id == updatedLesson.id);
-      if (existingLessonIndex != -1 && _lessonsByDay[day][existingLessonIndex].dayOfWeek != updatedLesson.dayOfWeek) {
+    for (int day = 0; day < lessonsByDay.length; day++) {
+      final existingLessonIndex = lessonsByDay[day].indexWhere((lesson) => lesson.id == updatedLesson.id);
+      if (existingLessonIndex != -1 && lessonsByDay[day][existingLessonIndex].dayOfWeek != updatedLesson.dayOfWeek) {
         return true;
       }
     }
@@ -308,23 +269,17 @@ class AppState extends ChangeNotifier {
   }
 
   void _moveLessonToDifferentDay(Lesson updatedLesson) {
-    // Удаляем из старого дня
-    for (int day = 0; day < _lessonsByDay.length; day++) {
-      _lessonsByDay[day].removeWhere((lesson) => lesson.id == updatedLesson.id);
+    for (int day = 0; day < lessonsByDay.length; day++) {
+      lessonsByDay[day].removeWhere((lesson) => lesson.id == updatedLesson.id);
     }
 
-    // Добавляем в новый день
     final newDay = updatedLesson.dayOfWeek.clamp(0, 4);
-    _lessonsByDay[newDay].add(updatedLesson);
+    lessonsByDay[newDay].add(updatedLesson);
     _sortLessonsByTime(newDay);
   }
 
-  void removeLesson(String id) {
-    deleteLesson(id); // Просто вызываем существующий метод
-  }
-
   void _sortLessonsByTime(int day) {
-    _lessonsByDay[day].sort((a, b) {
+    lessonsByDay[day].sort((a, b) {
       final aStart = a.time.split('-').first;
       final bStart = b.time.split('-').first;
       return aStart.compareTo(bStart);
@@ -332,7 +287,7 @@ class AppState extends ChangeNotifier {
   }
 
   Lesson? getLessonById(String id) {
-    for (final dayLessons in _lessonsByDay) {
+    for (final dayLessons in lessonsByDay) {
       try {
         return dayLessons.firstWhere((lesson) => lesson.id == id);
       } catch (e) {
@@ -340,21 +295,5 @@ class AppState extends ChangeNotifier {
       }
     }
     return null;
-  }
-
-  void updateStudentProfile({
-    String? name,
-    String? className,
-    String? email,
-    String? phoneNumber,
-  }) {
-    _studentProfile = StudentProfile(
-      name: name ?? _studentProfile.name,
-      className: className ?? _studentProfile.className,
-      email: email ?? _studentProfile.email,
-      phoneNumber: phoneNumber ?? _studentProfile.phoneNumber,
-      avatarUrl: _studentProfile.avatarUrl,
-    );
-    notifyListeners();
   }
 }

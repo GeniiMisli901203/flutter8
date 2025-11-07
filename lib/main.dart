@@ -5,10 +5,8 @@ import 'package:flutter5/state/app_state.dart';
 import 'service_locator.dart';
 
 void main() {
-  // Инициализируем DI контейнер
   setupServiceLocator();
 
-  // Получаем AppState из контейнера
   final appState = getIt<AppState>();
   final router = AppRouter(appState)..init();
 

@@ -1,5 +1,5 @@
-// lib/features/schedule/screens/schedule_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter5/service_locator.dart';
 import '../../../state/app_state.dart';
 import '../models/lesson.dart';
@@ -15,12 +15,11 @@ class ScheduleScreen extends StatefulWidget {
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
   late int _currentSelectedDay;
+  final appState = getIt<AppState>();
 
   @override
   void initState() {
     super.initState();
-    // Получаем начальное состояние из DI контейнера
-    final appState = getIt<AppState>();
     _currentSelectedDay = appState.selectedDay;
   }
 
@@ -28,14 +27,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     setState(() {
       _currentSelectedDay = dayIndex;
     });
-    // Изменяем состояние через DI контейнер
-    final appState = getIt<AppState>();
     appState.setDay(dayIndex);
   }
 
   void _showLessonDetails(BuildContext context, Lesson lesson) {
-    final appState = getIt<AppState>();
-
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LessonDetailScreen(
@@ -48,8 +43,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   void _addNewLesson(BuildContext context) {
-    final appState = getIt<AppState>();
-
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LessonEditScreen(
@@ -64,13 +57,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Получаем AppState из DI контейнера
-    final appState = getIt<AppState>();
     final days = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница'];
     final shortDays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ'];
-
-    // Фильтруем уроки для выбранного дня
-    final filteredLessons = appState.lessonsForSelectedDay;
 
     return Scaffold(
       appBar: AppBar(
@@ -143,99 +131,105 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
           // Основной контент
           Expanded(
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 5),
-              child: filteredLessons.isEmpty
-                  ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.schedule, size: 60, color: Colors.grey),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Нет уроков на выбранный день',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+            child: Observer(
+              builder: (context) {
+                final filteredLessons = appState.lessonsForSelectedDay;
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 5),
+                  child: filteredLessons.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.schedule, size: 60, color: Colors.grey),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Нет уроков на выбранный день',
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () => _addNewLesson(context),
+                          child: const Text('Добавить первый урок'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: () => _addNewLesson(context),
-                      child: const Text('Добавить первый урок'),
-                    ),
-                  ],
-                ),
-              )
-                  : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                itemCount: filteredLessons.length,
-                itemBuilder: (context, index) {
-                  final lesson = filteredLessons[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Card(
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: InkWell(
-                        onTap: () => _showLessonDetails(context, lesson),
-                        borderRadius: BorderRadius.circular(10),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          leading: Container(
-                            width: 45,
-                            height: 45,
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: Text(
-                                lesson.time.split('-').first,
+                  )
+                      : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    itemCount: filteredLessons.length,
+                    itemBuilder: (context, index) {
+                      final lesson = filteredLessons[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: Card(
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: InkWell(
+                            onTap: () => _showLessonDetails(context, lesson),
+                            borderRadius: BorderRadius.circular(10),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              leading: Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    lesson.time.split('-').first,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              title: Text(
+                                lesson.title,
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          title: Text(
-                            lesson.title,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 2),
-                              Text(
-                                lesson.teacher,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              const SizedBox(height: 1),
-                              Text(
-                                'Каб. ${lesson.room}',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey[600],
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ],
-                          ),
-                          trailing: Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14,
-                            color: Colors.grey[400],
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    lesson.teacher,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    'Каб. ${lesson.room}',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: Icon(
+                                Icons.arrow_forward_ios,
+                                size: 14,
+                                color: Colors.grey[400],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ],

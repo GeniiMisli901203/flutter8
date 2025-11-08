@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter5/service_locator.dart';
-import '../../../state/app_state.dart';
 import '../models/lesson.dart';
+import '../state/schedule_store.dart';
 import 'lesson_detail_screen.dart';
 import 'lesson_edit_screen.dart';
 
@@ -15,19 +15,19 @@ class ScheduleScreen extends StatefulWidget {
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
   late int _currentSelectedDay;
-  final appState = getIt<AppState>();
+  final scheduleStore = getIt<ScheduleStore>(); // Получаем ScheduleStore
 
   @override
   void initState() {
     super.initState();
-    _currentSelectedDay = appState.selectedDay;
+    _currentSelectedDay = scheduleStore.selectedDay;
   }
 
   void _handleDaySelected(int dayIndex) {
     setState(() {
       _currentSelectedDay = dayIndex;
     });
-    appState.setDay(dayIndex);
+    scheduleStore.setDay(dayIndex);
   }
 
   void _showLessonDetails(BuildContext context, Lesson lesson) {
@@ -35,8 +35,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       MaterialPageRoute(
         builder: (context) => LessonDetailScreen(
           lesson: lesson,
-          onEdit: appState.updateLesson,
-          onDelete: appState.deleteLesson,
+          onEdit: scheduleStore.updateLesson,
+          onDelete: scheduleStore.deleteLesson,
         ),
       ),
     );
@@ -46,7 +46,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LessonEditScreen(
-          onSave: appState.addLesson,
+          onSave: scheduleStore.addLesson,
           onSuccess: () {
             print('Урок успешно добавлен');
           },
@@ -133,7 +133,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           Expanded(
             child: Observer(
               builder: (context) {
-                final filteredLessons = appState.lessonsForSelectedDay;
+                final filteredLessons = scheduleStore.lessonsForSelectedDay;
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 5),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter5/service_locator.dart';
-import '../../../state/app_state.dart';
 import '../models/news_item.dart';
+import '../state/news_store.dart';
 import '../widgets/add_news_screen.dart';
 
 class NewsScreen extends StatelessWidget {
@@ -10,7 +10,7 @@ class NewsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appState = getIt<AppState>();
+    final newsStore = getIt<NewsStore>();
 
     return Scaffold(
       appBar: AppBar(
@@ -30,7 +30,7 @@ class NewsScreen extends StatelessWidget {
       ),
       body: Observer(
         builder: (context) {
-          final news = appState.news;
+          final news = newsStore.news;
 
           return news.isEmpty
               ? Center(
@@ -95,7 +95,7 @@ class NewsScreen extends StatelessWidget {
                 },
                 onDismissed: (direction) {
                   final removedNews = newsItem;
-                  appState.removeNews(newsItem.id);
+                  newsStore.removeNews(newsItem.id);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Новость удалена'),
@@ -104,7 +104,7 @@ class NewsScreen extends StatelessWidget {
                         label: 'ОТМЕНА',
                         textColor: Colors.white,
                         onPressed: () {
-                          appState.addNews(removedNews);
+                          newsStore.removeNews(newsItem.id);
                         },
                       ),
                     ),

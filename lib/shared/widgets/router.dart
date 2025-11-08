@@ -1,57 +1,45 @@
-// lib/shared/widgets/router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/news/screens/news_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/schedule/screens/schedule_screen.dart';
-import '../../state/app_state.dart';
-import 'bottom_nav_bar.dart';
 
 class AppRouter {
-  final AppState appState;
   late final GoRouter router;
 
-  AppRouter(this.appState);
+  AppRouter();
 
   void init() {
     router = GoRouter(
       initialLocation: '/news',
       routes: [
-        // Главный layout с BottomNavigationBar
         ShellRoute(
           builder: (context, state, child) {
-            _updateCurrentScreen(state.uri.toString());
             return Scaffold(
               body: child,
-              bottomNavigationBar: BottomNavBar(
-                currentScreen: appState.currentScreen,
-                onTabSelected: (screen) => appState.setScreen(screen),
-              ),
+              bottomNavigationBar: _buildBottomNavBar(state.uri.toString()),
             );
           },
           routes: [
-            // Новости
             GoRoute(
               path: '/news',
               pageBuilder: (context, state) => NoTransitionPage(
                 key: state.pageKey,
-                child: const NewsScreen(), // Простой конструктор
+                child: const NewsScreen(),
               ),
             ),
-            // Расписание
             GoRoute(
               path: '/schedule',
               pageBuilder: (context, state) => NoTransitionPage(
                 key: state.pageKey,
-                child: const ScheduleScreen(), // Простой конструктор
+                child: const ScheduleScreen(),
               ),
             ),
-            // Профиль
             GoRoute(
               path: '/profile',
               pageBuilder: (context, state) => NoTransitionPage(
                 key: state.pageKey,
-                child: const ProfileScreen(), // Простой конструктор
+                child: const ProfileScreen(),
               ),
             ),
           ],
@@ -60,17 +48,50 @@ class AppRouter {
     );
   }
 
-  void _updateCurrentScreen(String location) {
+  Widget _buildBottomNavBar(String location) {
+    int currentIndex = 0;
+
     switch (location) {
       case '/news':
-        appState.setScreen(AppScreen.news);
+        currentIndex = 0;
         break;
       case '/schedule':
-        appState.setScreen(AppScreen.schedule);
+        currentIndex = 1;
         break;
       case '/profile':
-        appState.setScreen(AppScreen.profile);
+        currentIndex = 2;
         break;
     }
+
+    return BottomNavigationBar(
+      currentIndex: currentIndex,
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            router.go('/news');
+            break;
+          case 1:
+            router.go('/schedule');
+            break;
+          case 2:
+            router.go('/profile');
+            break;
+        }
+      },
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.article),
+          label: 'Новости',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.schedule),
+          label: 'Расписание',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Профиль',
+        ),
+      ],
+    );
   }
 }

@@ -2,18 +2,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter5/service_locator.dart';
-import '../../../state/app_state.dart';
+import '../state/profile_store.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final appState = getIt<AppState>();
+    final profileStore = getIt<ProfileStore>();
 
     return Observer(
       builder: (context) {
-        final profile = appState.studentProfile;
+        final profile = profileStore.studentProfile;
 
         return Scaffold(
           appBar: AppBar(
@@ -24,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
-                  _showEditProfileDialog(context, appState);
+                  _showEditProfileDialog(context, profileStore);
                 },
               ),
             ],
@@ -188,8 +188,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showEditProfileDialog(BuildContext context, AppState appState) {
-    final profile = appState.studentProfile;
+  void _showEditProfileDialog(BuildContext context, ProfileStore profileStore) {
+    final profile = profileStore.studentProfile;
 
     TextEditingController nameController = TextEditingController(text: profile.name);
     TextEditingController classController = TextEditingController(text: profile.className);
@@ -228,7 +228,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              appState.updateStudentProfile(
+              profileStore.updateStudentProfile(
                 name: nameController.text,
                 className: classController.text,
                 email: emailController.text,

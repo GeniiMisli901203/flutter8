@@ -11,7 +11,6 @@ abstract class ScheduleStoreBase with Store {
 
   @observable
   ObservableList<ObservableList<Lesson>> lessonsByDay = ObservableList.of([
-    // Понедельник (0)
     ObservableList.of([
       Lesson(
         id: '1',
@@ -25,7 +24,6 @@ abstract class ScheduleStoreBase with Store {
         dayOfWeek: 0,
       ),
     ]),
-    // Вторник (1)
     ObservableList.of([
       Lesson(
         id: '4',
@@ -39,11 +37,8 @@ abstract class ScheduleStoreBase with Store {
         dayOfWeek: 1,
       ),
     ]),
-    // Среда (2) - ДОБАВЛЕНО
     ObservableList.of([]),
-    // Четверг (3) - ДОБАВЛЕНО
     ObservableList.of([]),
-    // Пятница (4) - ДОБАВЛЕНО
     ObservableList.of([]),
   ]);
 
@@ -52,26 +47,21 @@ abstract class ScheduleStoreBase with Store {
 
   @computed
   List<Lesson> get lessonsForSelectedDay {
-    // Добавляем проверку на границы массива
     if (selectedDay >= 0 && selectedDay < lessonsByDay.length) {
       return lessonsByDay[selectedDay];
     }
-    return []; // Возвращаем пустой список, если день вне границ
+    return [];
   }
 
   @action
   void setDay(int day) {
-    // Ограничиваем день в пределах 0-4 (пн-пт)
     selectedDay = day.clamp(0, 4);
   }
 
   @action
   void addLesson(Lesson lesson) {
     final day = lesson.dayOfWeek.clamp(0, 4);
-
-    // Гарантируем, что массив имеет достаточную длину
     _ensureDaysCapacity();
-
     lessonsByDay[day].add(lesson);
     _sortLessonsByTime(day);
   }
@@ -79,8 +69,6 @@ abstract class ScheduleStoreBase with Store {
   @action
   void updateLesson(Lesson updatedLesson) {
     final day = updatedLesson.dayOfWeek.clamp(0, 4);
-
-    // Гарантируем, что массив имеет достаточную длину
     _ensureDaysCapacity();
 
     if (_isEditingDifferentDay(updatedLesson)) {
@@ -102,8 +90,6 @@ abstract class ScheduleStoreBase with Store {
   }
 
   // Вспомогательные методы
-
-  /// Гарантирует, что массив lessonsByDay имеет достаточно элементов для всех дней недели
   void _ensureDaysCapacity() {
     while (lessonsByDay.length < 5) {
       lessonsByDay.add(ObservableList.of([]));
@@ -126,7 +112,7 @@ abstract class ScheduleStoreBase with Store {
     }
 
     final newDay = updatedLesson.dayOfWeek.clamp(0, 4);
-    _ensureDaysCapacity(); // Гарантируем емкость
+    _ensureDaysCapacity();
     lessonsByDay[newDay].add(updatedLesson);
     _sortLessonsByTime(newDay);
   }

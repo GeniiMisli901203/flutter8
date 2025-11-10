@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter5/service_locator.dart';
+import 'package:go_router/go_router.dart';
 import '../state/profile_store.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -21,11 +22,20 @@ class ProfileScreen extends StatelessWidget {
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
             actions: [
+              // Кнопка перехода к оценкам
+              IconButton(
+                icon: const Icon(Icons.grade),
+                onPressed: () {
+                  context.push('/grades');
+                },
+                tooltip: 'Мои оценки',
+              ),
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
                   _showEditProfileDialog(context, profileStore);
                 },
+                tooltip: 'Редактировать профиль',
               ),
             ],
           ),
@@ -107,6 +117,31 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
+
+                  // Кнопка перехода к оценкам (дополнительная в основном контенте)
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        context.push('/grades');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.assessment),
+                      label: const Text(
+                        'Посмотреть мои оценки',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+
                   Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(

@@ -15,7 +15,7 @@ class ScheduleScreen extends StatefulWidget {
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
   late int _currentSelectedDay;
-  final scheduleStore = getIt<ScheduleStore>(); // Получаем ScheduleStore
+  final scheduleStore = getIt<ScheduleStore>();
 
   @override
   void initState() {
@@ -34,9 +34,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LessonDetailScreen(
-          lesson: lesson,
-          onEdit: scheduleStore.updateLesson,
-          onDelete: scheduleStore.deleteLesson,
+          lesson: lesson, // Теперь передаем только урок
         ),
       ),
     );
@@ -45,12 +43,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void _addNewLesson(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LessonEditScreen(
-          onSave: scheduleStore.addLesson,
-          onSuccess: () {
-            print('Урок успешно добавлен');
-          },
-        ),
+        builder: (context) => const LessonEditScreen(), // Добавление нового урока
+      ),
+    );
+  }
+
+  void _editLesson(BuildContext context, Lesson lesson) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => LessonEditScreen(lesson: lesson), // Редактирование существующего урока
       ),
     );
   }
@@ -170,6 +171,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           ),
                           child: InkWell(
                             onTap: () => _showLessonDetails(context, lesson),
+                            onLongPress: () => _editLesson(context, lesson), // Долгое нажатие для редактирования
                             borderRadius: BorderRadius.circular(10),
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -217,10 +219,41 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   ),
                                 ],
                               ),
-                              trailing: Icon(
-                                Icons.arrow_forward_ios,
-                                size: 14,
-                                color: Colors.grey[400],
+                              trailing: PopupMenuButton<String>(
+                                icon: Icon(
+                                  Icons.more_vert,
+                                  size: 16,
+                                  color: Colors.grey[400],
+                                ),
+                                onSelected: (value) {
+                                  if (value == 'edit') {
+                                    _editLesson(context, lesson);
+                                  } else if (value == 'delete') {
+                                    _showDeleteDialog(context, lesson);
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) => [
+                                  const PopupMenuItem<String>(
+                                    value: 'edit',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.edit, size: 16),
+                                        SizedBox(width: 8),
+                                        Text('Редактировать'),
+                                      ],
+                                    ),
+                                  ),
+                                  const PopupMenuItem<String>(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.delete, size: 16, color: Colors.red),
+                                        SizedBox(width: 8),
+                                        Text('Удалить', style: TextStyle(color: Colors.red)),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -239,6 +272,35 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, Lesson lesson) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Удалить урок'),
+        content: Text('Вы уверены, что хотите удалить урок "${lesson.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () {
+              scheduleStore.deleteLesson(lesson.id);
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Урок "${lesson.title}" удален'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            child: const Text('Удалить', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

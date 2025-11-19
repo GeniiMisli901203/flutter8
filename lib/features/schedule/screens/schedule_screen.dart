@@ -34,7 +34,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => LessonDetailScreen(
-          lesson: lesson, // Теперь передаем только урок
+          lesson: lesson,
         ),
       ),
     );
@@ -43,7 +43,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void _addNewLesson(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const LessonEditScreen(), // Добавление нового урока
+        builder: (context) => const LessonEditScreen(),
       ),
     );
   }
@@ -51,7 +51,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void _editLesson(BuildContext context, Lesson lesson) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LessonEditScreen(lesson: lesson), // Редактирование существующего урока
+        builder: (context) => LessonEditScreen(lesson: lesson),
       ),
     );
   }
@@ -171,7 +171,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           ),
                           child: InkWell(
                             onTap: () => _showLessonDetails(context, lesson),
-                            onLongPress: () => _editLesson(context, lesson), // Долгое нажатие для редактирования
+                            onLongPress: () => _editLesson(context, lesson),
                             borderRadius: BorderRadius.circular(10),
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

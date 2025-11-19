@@ -22,19 +22,10 @@ class _LessonEditScreenState extends State<LessonEditScreen> {
   final LessonEditStore _lessonEditStore = getIt<LessonEditStore>();
   final ScheduleStore _scheduleStore = getIt<ScheduleStore>();
 
-  @override
-  void initState() {
-    super.initState();
 
-    // Инициализируем форму данными урока, если он передан (редактирование)
-    if (widget.lesson != null) {
-      _lessonEditStore.initializeForEdit(widget.lesson!);
-    }
-  }
 
   @override
   void dispose() {
-    // Сбрасываем состояние формы при закрытии экрана
     _lessonEditStore.reset();
     super.dispose();
   }

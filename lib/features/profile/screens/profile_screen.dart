@@ -118,10 +118,10 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  // Кнопка перехода к оценкам (дополнительная в основном контенте)
+                  // Кнопка перехода к оценкам
                   Container(
                     width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 20),
+                    margin: const EdgeInsets.only(bottom: 12),
                     child: ElevatedButton.icon(
                       onPressed: () {
                         context.push('/grades');
@@ -136,7 +136,77 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       icon: const Icon(Icons.assessment),
                       label: const Text(
-                        'Посмотреть мои оценки',
+                        'Мои оценки',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+
+                  // Кнопка перехода к заявкам
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        context.push('/requests');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.request_page),
+                      label: const Text(
+                        'Мои заявки',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+
+                  // Кнопка перехода к техподдержке
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        context.push('/support');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.support_agent),
+                      label: const Text(
+                        'Техподдержка',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        context.push('/extra-education');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.school),
+                      label: const Text(
+                        'Дополнительное образование',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                     ),

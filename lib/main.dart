@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter5/shared/widgets/router.dart';
+import 'UI/shared/router.dart';
 import 'service_locator.dart';
 
 void main() {

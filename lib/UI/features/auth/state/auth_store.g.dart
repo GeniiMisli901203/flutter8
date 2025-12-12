@@ -48,13 +48,13 @@ mixin _$AuthStore on AuthStoreBase, Store {
   );
 
   @override
-  User? get currentUser {
+  UserProfile? get currentUser {
     _$currentUserAtom.reportRead();
     return super.currentUser;
   }
 
   @override
-  set currentUser(User? value) {
+  set currentUser(UserProfile? value) {
     _$currentUserAtom.reportWrite(value, super.currentUser, () {
       super.currentUser = value;
     });
@@ -147,6 +147,24 @@ mixin _$AuthStore on AuthStoreBase, Store {
     });
   }
 
+  late final _$registerPhoneAtom = Atom(
+    name: 'AuthStoreBase.registerPhone',
+    context: context,
+  );
+
+  @override
+  String get registerPhone {
+    _$registerPhoneAtom.reportRead();
+    return super.registerPhone;
+  }
+
+  @override
+  set registerPhone(String value) {
+    _$registerPhoneAtom.reportWrite(value, super.registerPhone, () {
+      super.registerPhone = value;
+    });
+  }
+
   late final _$registerSchoolAtom = Atom(
     name: 'AuthStoreBase.registerSchool',
     context: context,
@@ -219,6 +237,26 @@ mixin _$AuthStore on AuthStoreBase, Store {
     });
   }
 
+  late final _$_checkLoginStatusAsyncAction = AsyncAction(
+    'AuthStoreBase._checkLoginStatus',
+    context: context,
+  );
+
+  @override
+  Future<void> _checkLoginStatus() {
+    return _$_checkLoginStatusAsyncAction.run(() => super._checkLoginStatus());
+  }
+
+  late final _$_loadUserProfileAsyncAction = AsyncAction(
+    'AuthStoreBase._loadUserProfile',
+    context: context,
+  );
+
+  @override
+  Future<void> _loadUserProfile() {
+    return _$_loadUserProfileAsyncAction.run(() => super._loadUserProfile());
+  }
+
   late final _$loginUserAsyncAction = AsyncAction(
     'AuthStoreBase.loginUser',
     context: context,
@@ -237,6 +275,64 @@ mixin _$AuthStore on AuthStoreBase, Store {
   @override
   Future<void> registerUser() {
     return _$registerUserAsyncAction.run(() => super.registerUser());
+  }
+
+  late final _$logoutAsyncAction = AsyncAction(
+    'AuthStoreBase.logout',
+    context: context,
+  );
+
+  @override
+  Future<void> logout() {
+    return _$logoutAsyncAction.run(() => super.logout());
+  }
+
+  late final _$updateProfileAsyncAction = AsyncAction(
+    'AuthStoreBase.updateProfile',
+    context: context,
+  );
+
+  @override
+  Future<void> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? phone,
+    String? school,
+    String? className,
+    String? login,
+  }) {
+    return _$updateProfileAsyncAction.run(
+      () => super.updateProfile(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        school: school,
+        className: className,
+        login: login,
+      ),
+    );
+  }
+
+  late final _$isProfileCompleteAsyncAction = AsyncAction(
+    'AuthStoreBase.isProfileComplete',
+    context: context,
+  );
+
+  @override
+  Future<bool> isProfileComplete() {
+    return _$isProfileCompleteAsyncAction.run(() => super.isProfileComplete());
+  }
+
+  late final _$getProfileStatsAsyncAction = AsyncAction(
+    'AuthStoreBase.getProfileStats',
+    context: context,
+  );
+
+  @override
+  Future<Map<String, dynamic>> getProfileStats() {
+    return _$getProfileStatsAsyncAction.run(() => super.getProfileStats());
   }
 
   late final _$AuthStoreBaseActionController = ActionController(
@@ -305,6 +401,18 @@ mixin _$AuthStore on AuthStoreBase, Store {
   }
 
   @override
+  void setRegisterPhone(String value) {
+    final _$actionInfo = _$AuthStoreBaseActionController.startAction(
+      name: 'AuthStoreBase.setRegisterPhone',
+    );
+    try {
+      return super.setRegisterPhone(value);
+    } finally {
+      _$AuthStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setRegisterSchool(String value) {
     final _$actionInfo = _$AuthStoreBaseActionController.startAction(
       name: 'AuthStoreBase.setRegisterSchool',
@@ -353,12 +461,12 @@ mixin _$AuthStore on AuthStoreBase, Store {
   }
 
   @override
-  void logout() {
+  void _clearRegistrationForm() {
     final _$actionInfo = _$AuthStoreBaseActionController.startAction(
-      name: 'AuthStoreBase.logout',
+      name: 'AuthStoreBase._clearRegistrationForm',
     );
     try {
-      return super.logout();
+      return super._clearRegistrationForm();
     } finally {
       _$AuthStoreBaseActionController.endAction(_$actionInfo);
     }
@@ -374,6 +482,7 @@ password: ${password},
 registerFirstName: ${registerFirstName},
 registerLastName: ${registerLastName},
 registerEmail: ${registerEmail},
+registerPhone: ${registerPhone},
 registerSchool: ${registerSchool},
 registerLogin: ${registerLogin},
 registerClassName: ${registerClassName},

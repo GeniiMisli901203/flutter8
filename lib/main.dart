@@ -13,8 +13,11 @@ class MyApp extends StatelessWidget {
 
   const MyApp({required this.router, Key? key}) : super(key: key);
 
+
+
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp.router(
       title: 'Школьное расписание',
       theme: ThemeData(

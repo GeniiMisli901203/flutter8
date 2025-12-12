@@ -24,6 +24,28 @@ mixin _$NewsStore on NewsStoreBase, Store {
     });
   }
 
+  late final _$_loadNewsFromLocalAsyncAction = AsyncAction(
+    'NewsStoreBase._loadNewsFromLocal',
+    context: context,
+  );
+
+  @override
+  Future<void> _loadNewsFromLocal() {
+    return _$_loadNewsFromLocalAsyncAction.run(
+      () => super._loadNewsFromLocal(),
+    );
+  }
+
+  late final _$saveNewsToLocalAsyncAction = AsyncAction(
+    'NewsStoreBase.saveNewsToLocal',
+    context: context,
+  );
+
+  @override
+  Future<void> saveNewsToLocal() {
+    return _$saveNewsToLocalAsyncAction.run(() => super.saveNewsToLocal());
+  }
+
   late final _$NewsStoreBaseActionController = ActionController(
     name: 'NewsStoreBase',
     context: context,

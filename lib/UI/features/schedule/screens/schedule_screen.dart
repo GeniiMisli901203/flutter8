@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter5/service_locator.dart';
-import '../../../../Domain/models/lesson.dart';
+import '../../../../Domain/entities/lesson.dart';
 import '../state/schedule_store.dart';
-import 'lesson_detail_screen.dart'; // Добавьте этот импорт
-import 'lesson_edit_screen.dart' as edit_screen;
+import 'lesson_detail_screen.dart';
+import 'lesson_edit_screen.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({Key? key}) : super(key: key);
@@ -33,9 +33,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void _showLessonDetails(BuildContext context, Lesson lesson) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LessonDetailScreen(
-          lesson: lesson,
-        ),
+        builder: (context) => LessonDetailScreen(lesson: lesson),
       ),
     );
   }
@@ -43,7 +41,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void _addNewLesson(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const edit_screen.LessonEditScreen(),
+        builder: (context) => const LessonEditScreen(),
       ),
     );
   }
@@ -51,7 +49,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void _editLesson(BuildContext context, Lesson lesson) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => edit_screen.LessonEditScreen(lesson: lesson),
+        builder: (context) => LessonEditScreen(lesson: lesson),
       ),
     );
   }
@@ -184,7 +182,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    lesson.time.split('-').first,
+                                    lesson.startTime.toString(),
                                     style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
@@ -195,7 +193,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 ),
                               ),
                               title: Text(
-                                lesson.title,
+                                lesson.title, // Изменено с subject на title
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,

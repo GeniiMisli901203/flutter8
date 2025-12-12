@@ -1,13 +1,16 @@
-import '../models/news_item.dart';
+import '../interfaces/news_item_datasource.dart';
 
 abstract class GetNewsItemUseCase {
-  Future<NewsItem> execute(String newsItemId);
+  Future<dynamic> execute(String id);
 }
 
 class GetNewsItemUseCaseImpl implements GetNewsItemUseCase {
+  final NewsItemDataSource _dataSource;
+
+  GetNewsItemUseCaseImpl(this._dataSource); // Конструктор с параметром
+
   @override
-  Future<NewsItem> execute(String newsItemId) {
-    // TODO: Implement use case logic
-    throw UnimplementedError();
+  Future<dynamic> execute(String id) async {
+    return await _dataSource.getNewsItem(id);
   }
 }

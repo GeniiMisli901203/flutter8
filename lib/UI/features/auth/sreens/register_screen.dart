@@ -77,9 +77,11 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // ПОЛЕ ДЛЯ ТЕЛЕФОНА - исправлено
                   TextField(
-                    onChanged: authStore.setRegisterEmail,
-                    keyboardType: TextInputType.emailAddress,
+                    onChanged: authStore.setRegisterPhone, // Вызываем setRegisterPhone
+                    keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       labelText: 'Номер телефона',
                       border: OutlineInputBorder(),
@@ -95,11 +97,99 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // ПОЛЕ ДЛЯ ПАРОЛЯ
                   TextField(
-                    onChanged: authStore.setRegisterLogin,
+                    onChanged: authStore.setPassword,
+                    obscureText: true,
                     decoration: const InputDecoration(
                       labelText: 'Пароль',
                       border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Для отладки - покажем состояние canRegister
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Observer(
+                      builder: (context) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Состояние регистрации:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Имя: ${authStore.registerFirstName.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.registerFirstName.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              'Фамилия: ${authStore.registerLastName.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.registerLastName.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              'Email: ${authStore.registerEmail.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.registerEmail.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              'Телефон: ${authStore.registerPhone.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.registerPhone.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              'Школа: ${authStore.registerSchool.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.registerSchool.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              'Класс: ${authStore.registerClassName.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.registerClassName.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              'Логин: ${authStore.registerLogin.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.registerLogin.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              'Пароль: ${authStore.password.isNotEmpty ? "✓" : "✗"}',
+                              style: TextStyle(
+                                color: authStore.password.isNotEmpty ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Можно регистрироваться: ${authStore.canRegister ? "ДА" : "НЕТ"}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: authStore.canRegister ? Colors.green : Colors.red,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -118,7 +208,7 @@ class RegisterScreen extends StatelessWidget {
                       }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: authStore.canRegister ? Colors.green : Colors.grey,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),

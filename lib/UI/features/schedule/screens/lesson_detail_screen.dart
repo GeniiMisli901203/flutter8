@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../Domain/models/lesson.dart';
+import '../../../../Domain/entities/lesson.dart'; // Используем entities
 import 'lesson_edit_screen.dart';
 
 class LessonDetailScreen extends StatelessWidget {
@@ -32,7 +32,7 @@ class LessonDetailScreen extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => LessonEditScreen(
-                    lesson: lesson, // Просто передаем урок для редактирования
+                    lesson: lesson,
                   ),
                 ),
               );

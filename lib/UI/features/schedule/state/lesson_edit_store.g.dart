@@ -16,6 +16,13 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
     () => super.canSave,
     name: 'LessonEditStoreBase.canSave',
   )).value;
+  Computed<String>? _$timeDisplayComputed;
+
+  @override
+  String get timeDisplay => (_$timeDisplayComputed ??= Computed<String>(
+    () => super.timeDisplay,
+    name: 'LessonEditStoreBase.timeDisplay',
+  )).value;
 
   late final _$titleAtom = Atom(
     name: 'LessonEditStoreBase.title',
@@ -32,24 +39,6 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
   set title(String value) {
     _$titleAtom.reportWrite(value, super.title, () {
       super.title = value;
-    });
-  }
-
-  late final _$timeAtom = Atom(
-    name: 'LessonEditStoreBase.time',
-    context: context,
-  );
-
-  @override
-  String get time {
-    _$timeAtom.reportRead();
-    return super.time;
-  }
-
-  @override
-  set time(String value) {
-    _$timeAtom.reportWrite(value, super.time, () {
-      super.time = value;
     });
   }
 
@@ -86,6 +75,78 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
   set room(String value) {
     _$roomAtom.reportWrite(value, super.room, () {
       super.room = value;
+    });
+  }
+
+  late final _$startHourAtom = Atom(
+    name: 'LessonEditStoreBase.startHour',
+    context: context,
+  );
+
+  @override
+  int get startHour {
+    _$startHourAtom.reportRead();
+    return super.startHour;
+  }
+
+  @override
+  set startHour(int value) {
+    _$startHourAtom.reportWrite(value, super.startHour, () {
+      super.startHour = value;
+    });
+  }
+
+  late final _$startMinuteAtom = Atom(
+    name: 'LessonEditStoreBase.startMinute',
+    context: context,
+  );
+
+  @override
+  int get startMinute {
+    _$startMinuteAtom.reportRead();
+    return super.startMinute;
+  }
+
+  @override
+  set startMinute(int value) {
+    _$startMinuteAtom.reportWrite(value, super.startMinute, () {
+      super.startMinute = value;
+    });
+  }
+
+  late final _$endHourAtom = Atom(
+    name: 'LessonEditStoreBase.endHour',
+    context: context,
+  );
+
+  @override
+  int get endHour {
+    _$endHourAtom.reportRead();
+    return super.endHour;
+  }
+
+  @override
+  set endHour(int value) {
+    _$endHourAtom.reportWrite(value, super.endHour, () {
+      super.endHour = value;
+    });
+  }
+
+  late final _$endMinuteAtom = Atom(
+    name: 'LessonEditStoreBase.endMinute',
+    context: context,
+  );
+
+  @override
+  int get endMinute {
+    _$endMinuteAtom.reportRead();
+    return super.endMinute;
+  }
+
+  @override
+  set endMinute(int value) {
+    _$endMinuteAtom.reportWrite(value, super.endMinute, () {
+      super.endMinute = value;
     });
   }
 
@@ -203,13 +264,13 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
   );
 
   @override
-  String? get editingLessonId {
+  int? get editingLessonId {
     _$editingLessonIdAtom.reportRead();
     return super.editingLessonId;
   }
 
   @override
-  set editingLessonId(String? value) {
+  set editingLessonId(int? value) {
     _$editingLessonIdAtom.reportWrite(value, super.editingLessonId, () {
       super.editingLessonId = value;
     });
@@ -227,18 +288,6 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
     );
     try {
       return super.setTitle(value);
-    } finally {
-      _$LessonEditStoreBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void setTime(String value) {
-    final _$actionInfo = _$LessonEditStoreBaseActionController.startAction(
-      name: 'LessonEditStoreBase.setTime',
-    );
-    try {
-      return super.setTime(value);
     } finally {
       _$LessonEditStoreBaseActionController.endAction(_$actionInfo);
     }
@@ -263,6 +312,54 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
     );
     try {
       return super.setRoom(value);
+    } finally {
+      _$LessonEditStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setStartHour(int value) {
+    final _$actionInfo = _$LessonEditStoreBaseActionController.startAction(
+      name: 'LessonEditStoreBase.setStartHour',
+    );
+    try {
+      return super.setStartHour(value);
+    } finally {
+      _$LessonEditStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setStartMinute(int value) {
+    final _$actionInfo = _$LessonEditStoreBaseActionController.startAction(
+      name: 'LessonEditStoreBase.setStartMinute',
+    );
+    try {
+      return super.setStartMinute(value);
+    } finally {
+      _$LessonEditStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setEndHour(int value) {
+    final _$actionInfo = _$LessonEditStoreBaseActionController.startAction(
+      name: 'LessonEditStoreBase.setEndHour',
+    );
+    try {
+      return super.setEndHour(value);
+    } finally {
+      _$LessonEditStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setEndMinute(int value) {
+    final _$actionInfo = _$LessonEditStoreBaseActionController.startAction(
+      name: 'LessonEditStoreBase.setEndMinute',
+    );
+    try {
+      return super.setEndMinute(value);
     } finally {
       _$LessonEditStoreBaseActionController.endAction(_$actionInfo);
     }
@@ -341,7 +438,7 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
   }
 
   @override
-  void setEditingLessonId(String? value) {
+  void setEditingLessonId(int? value) {
     final _$actionInfo = _$LessonEditStoreBaseActionController.startAction(
       name: 'LessonEditStoreBase.setEditingLessonId',
     );
@@ -380,9 +477,12 @@ mixin _$LessonEditStore on LessonEditStoreBase, Store {
   String toString() {
     return '''
 title: ${title},
-time: ${time},
 teacher: ${teacher},
 room: ${room},
+startHour: ${startHour},
+startMinute: ${startMinute},
+endHour: ${endHour},
+endMinute: ${endMinute},
 description: ${description},
 homework: ${homework},
 materials: ${materials},
@@ -390,7 +490,8 @@ selectedDay: ${selectedDay},
 isLoading: ${isLoading},
 isEditing: ${isEditing},
 editingLessonId: ${editingLessonId},
-canSave: ${canSave}
+canSave: ${canSave},
+timeDisplay: ${timeDisplay}
     ''';
   }
 }

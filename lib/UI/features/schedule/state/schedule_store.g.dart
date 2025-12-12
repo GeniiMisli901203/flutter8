@@ -9,14 +9,6 @@ part of 'schedule_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$ScheduleStore on ScheduleStoreBase, Store {
-  Computed<List<Lesson>>? _$allLessonsComputed;
-
-  @override
-  List<Lesson> get allLessons =>
-      (_$allLessonsComputed ??= Computed<List<Lesson>>(
-        () => super.allLessons,
-        name: 'ScheduleStoreBase.allLessons',
-      )).value;
   Computed<List<Lesson>>? _$lessonsForSelectedDayComputed;
 
   @override
@@ -24,6 +16,14 @@ mixin _$ScheduleStore on ScheduleStoreBase, Store {
       (_$lessonsForSelectedDayComputed ??= Computed<List<Lesson>>(
         () => super.lessonsForSelectedDay,
         name: 'ScheduleStoreBase.lessonsForSelectedDay',
+      )).value;
+  Computed<List<Lesson>>? _$allLessonsComputed;
+
+  @override
+  List<Lesson> get allLessons =>
+      (_$allLessonsComputed ??= Computed<List<Lesson>>(
+        () => super.allLessons,
+        name: 'ScheduleStoreBase.allLessons',
       )).value;
 
   late final _$selectedDayAtom = Atom(
@@ -44,22 +44,100 @@ mixin _$ScheduleStore on ScheduleStoreBase, Store {
     });
   }
 
-  late final _$lessonsByDayAtom = Atom(
-    name: 'ScheduleStoreBase.lessonsByDay',
+  late final _$scheduleAtom = Atom(
+    name: 'ScheduleStoreBase.schedule',
     context: context,
   );
 
   @override
-  ObservableList<ObservableList<Lesson>> get lessonsByDay {
-    _$lessonsByDayAtom.reportRead();
-    return super.lessonsByDay;
+  Map<int, List<Lesson>> get schedule {
+    _$scheduleAtom.reportRead();
+    return super.schedule;
   }
 
   @override
-  set lessonsByDay(ObservableList<ObservableList<Lesson>> value) {
-    _$lessonsByDayAtom.reportWrite(value, super.lessonsByDay, () {
-      super.lessonsByDay = value;
+  set schedule(Map<int, List<Lesson>> value) {
+    _$scheduleAtom.reportWrite(value, super.schedule, () {
+      super.schedule = value;
     });
+  }
+
+  late final _$isLoadingAtom = Atom(
+    name: 'ScheduleStoreBase.isLoading',
+    context: context,
+  );
+
+  @override
+  bool get isLoading {
+    _$isLoadingAtom.reportRead();
+    return super.isLoading;
+  }
+
+  @override
+  set isLoading(bool value) {
+    _$isLoadingAtom.reportWrite(value, super.isLoading, () {
+      super.isLoading = value;
+    });
+  }
+
+  late final _$errorMessageAtom = Atom(
+    name: 'ScheduleStoreBase.errorMessage',
+    context: context,
+  );
+
+  @override
+  String? get errorMessage {
+    _$errorMessageAtom.reportRead();
+    return super.errorMessage;
+  }
+
+  @override
+  set errorMessage(String? value) {
+    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
+      super.errorMessage = value;
+    });
+  }
+
+  late final _$loadScheduleAsyncAction = AsyncAction(
+    'ScheduleStoreBase.loadSchedule',
+    context: context,
+  );
+
+  @override
+  Future<void> loadSchedule() {
+    return _$loadScheduleAsyncAction.run(() => super.loadSchedule());
+  }
+
+  late final _$addLessonAsyncAction = AsyncAction(
+    'ScheduleStoreBase.addLesson',
+    context: context,
+  );
+
+  @override
+  Future<void> addLesson(Lesson lesson) {
+    return _$addLessonAsyncAction.run(() => super.addLesson(lesson));
+  }
+
+  late final _$updateLessonAsyncAction = AsyncAction(
+    'ScheduleStoreBase.updateLesson',
+    context: context,
+  );
+
+  @override
+  Future<void> updateLesson(Lesson updatedLesson) {
+    return _$updateLessonAsyncAction.run(
+      () => super.updateLesson(updatedLesson),
+    );
+  }
+
+  late final _$deleteLessonAsyncAction = AsyncAction(
+    'ScheduleStoreBase.deleteLesson',
+    context: context,
+  );
+
+  @override
+  Future<void> deleteLesson(int lessonId) {
+    return _$deleteLessonAsyncAction.run(() => super.deleteLesson(lessonId));
   }
 
   late final _$ScheduleStoreBaseActionController = ActionController(
@@ -80,48 +158,14 @@ mixin _$ScheduleStore on ScheduleStoreBase, Store {
   }
 
   @override
-  void addLesson(Lesson lesson) {
-    final _$actionInfo = _$ScheduleStoreBaseActionController.startAction(
-      name: 'ScheduleStoreBase.addLesson',
-    );
-    try {
-      return super.addLesson(lesson);
-    } finally {
-      _$ScheduleStoreBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void updateLesson(Lesson updatedLesson) {
-    final _$actionInfo = _$ScheduleStoreBaseActionController.startAction(
-      name: 'ScheduleStoreBase.updateLesson',
-    );
-    try {
-      return super.updateLesson(updatedLesson);
-    } finally {
-      _$ScheduleStoreBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void deleteLesson(String lessonId) {
-    final _$actionInfo = _$ScheduleStoreBaseActionController.startAction(
-      name: 'ScheduleStoreBase.deleteLesson',
-    );
-    try {
-      return super.deleteLesson(lessonId);
-    } finally {
-      _$ScheduleStoreBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   String toString() {
     return '''
 selectedDay: ${selectedDay},
-lessonsByDay: ${lessonsByDay},
-allLessons: ${allLessons},
-lessonsForSelectedDay: ${lessonsForSelectedDay}
+schedule: ${schedule},
+isLoading: ${isLoading},
+errorMessage: ${errorMessage},
+lessonsForSelectedDay: ${lessonsForSelectedDay},
+allLessons: ${allLessons}
     ''';
   }
 }

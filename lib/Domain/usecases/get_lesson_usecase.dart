@@ -1,13 +1,16 @@
-import '../models/lesson.dart';
+import '../interfaces/lesson_datasource.dart';
 
 abstract class GetLessonUseCase {
-  Future<Lesson> execute(String lessonId);
+  Future<dynamic> execute(String id);
 }
 
 class GetLessonUseCaseImpl implements GetLessonUseCase {
+  final LessonDataSource _dataSource;
+
+  GetLessonUseCaseImpl(this._dataSource); // Конструктор с параметром
+
   @override
-  Future<Lesson> execute(String lessonId) {
-    // TODO: Implement use case logic
-    throw UnimplementedError();
+  Future<dynamic> execute(String id) async {
+    return await _dataSource.getLesson(id);
   }
 }

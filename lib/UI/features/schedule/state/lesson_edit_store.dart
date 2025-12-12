@@ -1,5 +1,5 @@
 import 'package:mobx/mobx.dart';
-import '../../../../Domain/models/lesson.dart';
+import '../../../../Domain/entities/lesson.dart'; // Используем entities
 
 part 'lesson_edit_store.g.dart';
 
@@ -10,13 +10,22 @@ abstract class LessonEditStoreBase with Store {
   String title = '';
 
   @observable
-  String time = '';
-
-  @observable
   String teacher = '';
 
   @observable
   String room = '';
+
+  @observable
+  int startHour = 9;
+
+  @observable
+  int startMinute = 0;
+
+  @observable
+  int endHour = 10;
+
+  @observable
+  int endMinute = 0;
 
   @observable
   String description = '';
@@ -37,26 +46,45 @@ abstract class LessonEditStoreBase with Store {
   bool isEditing = false;
 
   @observable
-  String? editingLessonId;
+  int? editingLessonId; // Изменено на int?
 
   @computed
   bool get canSave =>
       title.isNotEmpty &&
-          time.isNotEmpty &&
           teacher.isNotEmpty &&
-          room.isNotEmpty;
+          room.isNotEmpty &&
+          startHour >= 0 && startHour <= 23 &&
+          startMinute >= 0 && startMinute <= 59 &&
+          endHour >= 0 && endHour <= 23 &&
+          endMinute >= 0 && endMinute <= 59;
+
+  @computed
+  String get timeDisplay => '${_formatTime(startHour, startMinute)}-${_formatTime(endHour, endMinute)}';
+
+  String _formatTime(int hour, int minute) {
+    return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+  }
 
   @action
   void setTitle(String value) => title = value;
-
-  @action
-  void setTime(String value) => time = value;
 
   @action
   void setTeacher(String value) => teacher = value;
 
   @action
   void setRoom(String value) => room = value;
+
+  @action
+  void setStartHour(int value) => startHour = value.clamp(0, 23);
+
+  @action
+  void setStartMinute(int value) => startMinute = value.clamp(0, 59);
+
+  @action
+  void setEndHour(int value) => endHour = value.clamp(0, 23);
+
+  @action
+  void setEndMinute(int value) => endMinute = value.clamp(0, 59);
 
   @action
   void setDescription(String value) => description = value;
@@ -77,15 +105,18 @@ abstract class LessonEditStoreBase with Store {
   void setEditing(bool value) => isEditing = value;
 
   @action
-  void setEditingLessonId(String? value) => editingLessonId = value;
+  void setEditingLessonId(int? value) => editingLessonId = value;
 
   // Инициализация для редактирования
   @action
   void initializeForEdit(Lesson lesson) {
     title = lesson.title;
-    time = lesson.time;
     teacher = lesson.teacher;
     room = lesson.room;
+    startHour = lesson.startTime.hour;
+    startMinute = lesson.startTime.minute;
+    endHour = lesson.endTime.hour;
+    endMinute = lesson.endTime.minute;
     description = lesson.description;
     homework = lesson.homework;
     materials = lesson.materials;
@@ -97,15 +128,16 @@ abstract class LessonEditStoreBase with Store {
   // Создание объекта урока из текущих данных
   Lesson createLesson() {
     return Lesson(
-      id: isEditing ? editingLessonId! : DateTime.now().millisecondsSinceEpoch.toString(),
+      id: isEditing && editingLessonId != null ? editingLessonId! : DateTime.now().millisecondsSinceEpoch,
       title: title,
-      time: time,
       teacher: teacher,
       room: room,
+      startTime: Time(hour: startHour, minute: startMinute),
+      endTime: Time(hour: endHour, minute: endMinute),
+      dayOfWeek: selectedDay,
       description: description,
       homework: homework,
       materials: materials,
-      dayOfWeek: selectedDay,
     );
   }
 
@@ -113,9 +145,12 @@ abstract class LessonEditStoreBase with Store {
   @action
   void reset() {
     title = '';
-    time = '';
     teacher = '';
     room = '';
+    startHour = 9;
+    startMinute = 0;
+    endHour = 10;
+    endMinute = 0;
     description = '';
     homework = '';
     materials = '';

@@ -1,63 +1,122 @@
 import 'package:mobx/mobx.dart';
+import '../../../../Domain/entities/user_profile.dart';
+import '../../../../Domain/usecases/get_user_profile_usecase.dart';
+import '../../../../Domain/usecases/save_user_profile_usecase.dart';
 
 part 'profile_store.g.dart';
-
-class StudentProfile {
-  final String name;
-  final String className;
-  final String email;
-  final String phoneNumber;
-  final String avatarUrl;
-
-  StudentProfile({
-    required this.name,
-    required this.className,
-    required this.email,
-    required this.phoneNumber,
-    required this.avatarUrl,
-  });
-
-  StudentProfile copyWith({
-    String? name,
-    String? className,
-    String? email,
-    String? phoneNumber,
-    String? avatarUrl,
-  }) {
-    return StudentProfile(
-      name: name ?? this.name,
-      className: className ?? this.className,
-      email: email ?? this.email,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-    );
-  }
-}
 
 class ProfileStore = ProfileStoreBase with _$ProfileStore;
 
 abstract class ProfileStoreBase with Store {
+  final GetUserProfileUseCase _getUserProfileUseCase;
+  final SaveUserProfileUseCase _saveUserProfileUseCase;
+
+  ProfileStoreBase(this._getUserProfileUseCase, this._saveUserProfileUseCase) {
+    loadProfile();
+  }
+
   @observable
-  StudentProfile studentProfile = StudentProfile(
-    name: 'Жнакие Михаил',
-    className: '11А',
-    email: 'mmm@mail.ru',
-    phoneNumber: '+7 (999) 123-45-67',
-    avatarUrl: 'https://example.com/avatar.jpg',
-  );
+  UserProfile? userProfile;
+
+  @observable
+  bool isLoading = false;
 
   @action
-  void updateStudentProfile({
-    String? name,
-    String? className,
+  Future<void> loadProfile() async {
+    isLoading = true;
+    try {
+      userProfile = await _getUserProfileUseCase.execute();
+      print('✅ Профиль загружен: ${userProfile?.fullName}');
+    } catch (e) {
+      print('❌ Ошибка при загрузке профиля: $e');
+      userProfile = null;
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  @action
+  Future<void> updateProfile({
+    String? firstName,
+    String? lastName,
     String? email,
-    String? phoneNumber,
-  }) {
-    studentProfile = studentProfile.copyWith(
-      name: name,
-      className: className,
+    String? phone,
+    String? school,
+    String? className,
+  }) async {
+    if (userProfile == null) {
+      throw Exception('Профиль не загружен');
+    }
+
+    final updatedProfile = userProfile!.copyWith(
+      firstName: firstName,
+      lastName: lastName,
       email: email,
-      phoneNumber: phoneNumber,
+      phone: phone,
+      school: school,
+      className: className,
     );
+
+    isLoading = true;
+    try {
+      await _saveUserProfileUseCase.execute(updatedProfile);
+      userProfile = updatedProfile;
+      print('✅ Профиль обновлен и сохранен');
+    } catch (e) {
+      print('❌ Ошибка при сохранении профиля: $e');
+      throw e;
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  @action
+  Future<Map<String, String>> getProfileData() async {
+    try {
+      final profile = await _getUserProfileUseCase.execute();
+      return profile.toMap();
+    } catch (e) {
+      print('❌ Ошибка при получении данных профиля: $e');
+      return {};
+    }
+  }
+
+  // Метод для проверки, заполнен ли профиль
+  @computed
+  bool get isProfileComplete {
+    return userProfile != null &&
+        userProfile!.firstName.isNotEmpty &&
+        userProfile!.lastName.isNotEmpty &&
+        userProfile!.email.isNotEmpty &&
+        userProfile!.phone.isNotEmpty &&
+        userProfile!.school.isNotEmpty &&
+        userProfile!.className.isNotEmpty &&
+        userProfile!.login.isNotEmpty;
+  }
+
+  // Геттер для совместимости со старым кодом (если нужно)
+  @computed
+  Map<String, dynamic> get studentProfileData {
+    if (userProfile == null) {
+      return {
+        'name': '',
+        'className': '',
+        'email': '',
+        'phoneNumber': '',
+        'school': '',
+        'login': '',
+        'avatarUrl': '',
+      };
+    }
+
+    return {
+      'name': userProfile!.fullName,
+      'className': userProfile!.className,
+      'email': userProfile!.email,
+      'phoneNumber': userProfile!.phone,
+      'school': userProfile!.school,
+      'login': userProfile!.login,
+      'avatarUrl': '', // оставляем пустым или генерируем
+    };
   }
 }

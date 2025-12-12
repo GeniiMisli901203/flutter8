@@ -37,12 +37,20 @@ dependencies:
   get_it: ^8.2.0
   flutter_mobx: ^2.3.0
   mobx: ^2.5.0
+  shared_preferences: ^2.5.4
+  flutter_secure_storage: ^10.0.0
+  sqflite: ^2.4.2
+  path: ^1.9.0
+  path_provider: ^2.0.15
+  drift: ^2.13.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mobx_codegen: ^2.7.4
   build_runner: ^2.10.1
+  drift_dev: ^2.13.0
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

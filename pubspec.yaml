@@ -43,6 +43,7 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.0.15
   drift: ^2.13.0
+  sqflite_common_ffi: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +51,7 @@ dev_dependencies:
   mobx_codegen: ^2.7.4
   build_runner: ^2.10.1
   drift_dev: ^2.13.0
+
 
 
   # The "flutter_lints" package below contains a set of recommended lints to

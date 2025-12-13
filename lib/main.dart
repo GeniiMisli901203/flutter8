@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'UI/shared/router.dart';
 import 'service_locator.dart';
 
 void main() {
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+
   setupServiceLocator();
   final router = AppRouter()..init();
   runApp(MyApp(router: router));

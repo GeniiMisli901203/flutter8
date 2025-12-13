@@ -10,26 +10,25 @@ class SharedPreferencesAuthDataSource implements AuthDataSource {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_loginTokenKey, token);
 
-    // Проверка, что сохранилось
     final savedToken = prefs.getString(_loginTokenKey);
-    print('✅ Токен сохранен, проверка: $savedToken');
+    print('Токен сохранен, проверка: $savedToken');
   }
 
   @override
   Future<String?> getLoginInfo() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_loginTokenKey);
-    print('🔍 Получение токена: $token');
+    print('Получение токена: $token');
     return token;
   }
 
   @override
   Future<void> clearLoginInfo() async {
-    print('🗑️ Очистка токена');
+    print('Очистка токена');
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_loginTokenKey);
 
     final tokenAfterClear = prefs.getString(_loginTokenKey);
-    print('✅ Токен очищен, проверка: $tokenAfterClear');
+    print('Токен очищен, проверка: $tokenAfterClear');
   }
 }

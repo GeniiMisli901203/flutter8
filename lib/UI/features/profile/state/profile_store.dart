@@ -74,6 +74,12 @@ abstract class ProfileStoreBase with Store {
   Future<Map<String, String>> getProfileData() async {
     try {
       final profile = await _getUserProfileUseCase.execute();
+
+      // Проверка на null перед вызовом toMap()
+      if (profile == null) {
+        return {};
+      }
+
       return profile.toMap();
     } catch (e) {
       print('❌ Ошибка при получении данных профиля: $e');
@@ -118,5 +124,47 @@ abstract class ProfileStoreBase with Store {
       'login': userProfile!.login,
       'avatarUrl': '', // оставляем пустым или генерируем
     };
+  }
+
+  // Новый метод для безопасного получения данных профиля
+  @computed
+  Map<String, String?> get safeProfileData {
+    if (userProfile == null) {
+      return {
+        'firstName': null,
+        'lastName': null,
+        'fullName': null,
+        'email': null,
+        'phone': null,
+        'school': null,
+        'className': null,
+        'login': null,
+      };
+    }
+
+    return {
+      'firstName': userProfile!.firstName,
+      'lastName': userProfile!.lastName,
+      'fullName': userProfile!.fullName,
+      'email': userProfile!.email,
+      'phone': userProfile!.phone,
+      'school': userProfile!.school,
+      'className': userProfile!.className,
+      'login': userProfile!.login,
+    };
+  }
+
+  // Метод для сброса профиля
+  @action
+  Future<void> clearProfile() async {
+    isLoading = true;
+    try {
+      userProfile = null;
+      print('✅ Профиль очищен');
+    } catch (e) {
+      print('❌ Ошибка при очистке профиля: $e');
+    } finally {
+      isLoading = false;
+    }
   }
 }

@@ -1,56 +1,49 @@
 import '../entities/lesson.dart';
 
 class ScheduleManager {
-  // Сортировка уроков по времени (бизнес-правило)
-  static List<Lesson> sortLessonsByTime(List<Lesson> lessons) {
-    return lessons..sort((a, b) {
-      final aStart = _timeToMinutes(a.startTime);
-      final bStart = _timeToMinutes(b.startTime);
-      return aStart.compareTo(bStart);
-    });
-  }
-
-  // Распределение уроков по дням (бизнес-правило)
-  static Map<int, List<Lesson>> groupLessonsByDay(List<Lesson> lessons) {
-    final result = <int, List<Lesson>>{};
-    for (int i = 0; i < 5; i++) {
-      result[i] = [];
-    }
-
-    for (final lesson in lessons) {
-      final day = lesson.dayOfWeek.clamp(0, 4);
-      result[day]!.add(lesson);
-    }
-
-    // Сортируем уроки в каждом дне
-    for (final dayLessons in result.values) {
-      dayLessons.sort((a, b) {
-        return _timeToMinutes(a.startTime).compareTo(_timeToMinutes(b.startTime));
-      });
-    }
-
-    return result;
-  }
-
-  // Валидация дня недели (бизнес-правило)
-  static bool isValidDay(int day) => day >= 0 && day < 5;
-
-  // Конвертация времени в минуты (вспомогательная бизнес-логика)
-  static int _timeToMinutes(Time time) => time.hour * 60 + time.minute;
-
-  // Проверка пересечения уроков (бизнес-правило)
   static bool hasTimeConflict(Lesson newLesson, List<Lesson> existingLessons) {
-    final newStart = _timeToMinutes(newLesson.startTime);
-    final newEnd = _timeToMinutes(newLesson.endTime);
+    for (final existingLesson in existingLessons) {
+      // Проверяем, если уроки в один день
+      if (newLesson.dayOfWeek != existingLesson.dayOfWeek) {
+        continue;
+      }
 
-    for (final existing in existingLessons) {
-      final existingStart = _timeToMinutes(existing.startTime);
-      final existingEnd = _timeToMinutes(existing.endTime);
-
-      if (newStart < existingEnd && newEnd > existingStart) {
+      // Проверяем пересечение временных интервалов
+      if (_timeIntervalsOverlap(newLesson, existingLesson)) {
         return true;
       }
     }
+
     return false;
+  }
+
+  static bool _timeIntervalsOverlap(Lesson lesson1, Lesson lesson2) {
+    final start1 = lesson1.startTime;
+    final end1 = lesson1.endTime;
+    final start2 = lesson2.startTime;
+    final end2 = lesson2.endTime;
+
+    // Конвертируем время в минуты для удобства сравнения
+    final start1Minutes = start1.hour * 60 + start1.minute;
+    final end1Minutes = end1.hour * 60 + end1.minute;
+    final start2Minutes = start2.hour * 60 + start2.minute;
+    final end2Minutes = end2.hour * 60 + end2.minute;
+
+    // Проверяем пересечение интервалов
+    return start1Minutes < end2Minutes && end1Minutes > start2Minutes;
+  }
+
+  static List<Lesson> sortLessonsByTime(List<Lesson> lessons) {
+    lessons.sort((a, b) {
+      final startA = a.startTime.hour * 60 + a.startTime.minute;
+      final startB = b.startTime.hour * 60 + b.startTime.minute;
+      return startA.compareTo(startB);
+    });
+
+    return lessons;
+  }
+
+  static bool isValidDay(int day) {
+    return day >= 0 && day <= 4; // Пн-Пт
   }
 }

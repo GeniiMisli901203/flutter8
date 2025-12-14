@@ -8,17 +8,13 @@ class SaveScheduleUseCase {
   SaveScheduleUseCase(this._dataSource);
 
   Future<void> execute(Map<int, List<Lesson>> schedule) async {
-
     final allLessons = schedule.values.expand((dayLessons) => dayLessons).toList();
-
     _validateSchedule(schedule);
-
     await _dataSource.saveLessons(allLessons);
   }
 
   void _validateSchedule(Map<int, List<Lesson>> schedule) {
     for (final dayLessons in schedule.values) {
-
       for (int i = 0; i < dayLessons.length; i++) {
         for (int j = i + 1; j < dayLessons.length; j++) {
           if (ScheduleManager.hasTimeConflict(dayLessons[i], [dayLessons[j]])) {

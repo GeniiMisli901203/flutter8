@@ -24,6 +24,14 @@ mixin _$ProfileStore on ProfileStoreBase, Store {
         () => super.studentProfileData,
         name: 'ProfileStoreBase.studentProfileData',
       )).value;
+  Computed<Map<String, String?>>? _$safeProfileDataComputed;
+
+  @override
+  Map<String, String?> get safeProfileData =>
+      (_$safeProfileDataComputed ??= Computed<Map<String, String?>>(
+        () => super.safeProfileData,
+        name: 'ProfileStoreBase.safeProfileData',
+      )).value;
 
   late final _$userProfileAtom = Atom(
     name: 'ProfileStoreBase.userProfile',
@@ -107,13 +115,24 @@ mixin _$ProfileStore on ProfileStoreBase, Store {
     return _$getProfileDataAsyncAction.run(() => super.getProfileData());
   }
 
+  late final _$clearProfileAsyncAction = AsyncAction(
+    'ProfileStoreBase.clearProfile',
+    context: context,
+  );
+
+  @override
+  Future<void> clearProfile() {
+    return _$clearProfileAsyncAction.run(() => super.clearProfile());
+  }
+
   @override
   String toString() {
     return '''
 userProfile: ${userProfile},
 isLoading: ${isLoading},
 isProfileComplete: ${isProfileComplete},
-studentProfileData: ${studentProfileData}
+studentProfileData: ${studentProfileData},
+safeProfileData: ${safeProfileData}
     ''';
   }
 }

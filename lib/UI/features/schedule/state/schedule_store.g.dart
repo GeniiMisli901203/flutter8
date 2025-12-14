@@ -158,6 +158,18 @@ mixin _$ScheduleStore on ScheduleStoreBase, Store {
   }
 
   @override
+  void setSelectedDay(int day) {
+    final _$actionInfo = _$ScheduleStoreBaseActionController.startAction(
+      name: 'ScheduleStoreBase.setSelectedDay',
+    );
+    try {
+      return super.setSelectedDay(day);
+    } finally {
+      _$ScheduleStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 selectedDay: ${selectedDay},

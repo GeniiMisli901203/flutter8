@@ -1,15 +1,11 @@
 import 'package:get_it/get_it.dart';
 
-// Repositories
-import 'Data/datasources/repositories/auth_repository.dart';
-import 'Data/datasources/repositories/school_repository.dart';
-import 'Data/datasources/repositories/user_data_repository.dart';
-
 // Domain - Use Cases
 import 'Domain/usecases/get_schedule_usecase.dart';
 import 'Domain/usecases/get_user_profile_usecase.dart';
 
-// UI - Stores
+
+import 'Domain/usecases/save_news_usecase.dart';
 import 'Domain/usecases/save_scgedule_usecase.dart';
 import 'Domain/usecases/save_user_profile_usecase.dart';
 import 'UI/features/additional_education/state/extra_education_store.dart';
@@ -50,6 +46,9 @@ import 'Domain/usecases/save_lesson_usecase.dart';
 import 'Domain/usecases/save_news_item_usecase.dart';
 import 'Domain/usecases/save_programm_usecase.dart';
 
+
+import 'Domain/usecases/get_news_usecase.dart'; // Предположим, что создадим
+
 final GetIt getIt = GetIt.instance;
 
 void setupServiceLocator() {
@@ -65,21 +64,15 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<SecureUserDataSource>(() => SecureUserDataSourceImpl());
   getIt.registerLazySingleton<SchoolDataSource>(() => SqlSchoolDataSource());
 
-  // ========== REPOSITORIES ==========
-
-  getIt.registerLazySingleton<AuthRepository>(() => AuthRepository(getIt<AuthDataSource>()));
-  getIt.registerLazySingleton<UserDataRepository>(() => UserDataRepository(getIt<SecureUserDataSource>()));
-  getIt.registerLazySingleton<SchoolRepository>(() => SchoolRepository(getIt<SchoolDataSource>()));
-
   // ========== USE CASES ==========
 
   // User Profile Use Cases
   getIt.registerLazySingleton<SaveUserProfileUseCase>(
-          () => SaveUserProfileUseCase(getIt<UserDataRepository>())
+          () => SaveUserProfileUseCase(getIt<SecureUserDataSource>())
   );
 
   getIt.registerLazySingleton<GetUserProfileUseCase>(
-          () => GetUserProfileUseCase(getIt<UserDataRepository>())
+          () => GetUserProfileUseCase(getIt<SecureUserDataSource>())
   );
 
   // Lesson Use Cases
@@ -108,6 +101,15 @@ void setupServiceLocator() {
     return SaveNewsItemUseCaseImpl(getIt<NewsItemDataSource>());
   });
 
+  // Создайте новый UseCase для работы с новостями через SchoolDataSource
+  getIt.registerLazySingleton<GetNewsUseCase>(
+          () => GetNewsUseCase(getIt<SchoolDataSource>())
+  );
+
+  getIt.registerLazySingleton<SaveNewsUseCase>(
+          () => SaveNewsUseCase(getIt<SchoolDataSource>())
+  );
+
   // Program Use Cases
   getIt.registerLazySingleton<GetProgrammUseCase>(() {
     return GetProgrammUseCaseImpl(getIt<ProgrammDataSource>());
@@ -121,27 +123,7 @@ void setupServiceLocator() {
     return SaveProgrammUseCaseImpl(getIt<ProgrammDataSource>());
   });
 
-  // ========== STORES ==========
-
-  // Auth Store
-  getIt.registerLazySingleton<AuthStore>(() => AuthStore(
-    getIt<AuthRepository>(),
-    getIt<SaveUserProfileUseCase>(),
-    getIt<GetUserProfileUseCase>(),
-  ));
-
-  // Profile Store - с использованием Use Cases
-  getIt.registerLazySingleton<ProfileStore>(() => ProfileStore(
-    getIt<GetUserProfileUseCase>(),
-    getIt<SaveUserProfileUseCase>(),
-  ));
-
-  // News Stores
-  getIt.registerFactory<AddNewsStore>(() => AddNewsStore());
-  getIt.registerLazySingleton<NewsStore>(() => NewsStore(getIt<SchoolRepository>()));
-
-  // Schedule Stores
-// Use Cases
+  // Schedule Use Cases
   getIt.registerLazySingleton<GetScheduleUseCase>(
           () => GetScheduleUseCase(getIt<SchoolDataSource>())
   );
@@ -150,11 +132,36 @@ void setupServiceLocator() {
           () => SaveScheduleUseCase(getIt<SchoolDataSource>())
   );
 
-// Store
+  // ========== STORES ==========
+
+  // Auth Store
+  getIt.registerLazySingleton<AuthStore>(() => AuthStore(
+    getIt<AuthDataSource>(),
+    getIt<SaveUserProfileUseCase>(),
+    getIt<GetUserProfileUseCase>(),
+  ));
+
+  // Profile Store
+  getIt.registerLazySingleton<ProfileStore>(() => ProfileStore(
+    getIt<GetUserProfileUseCase>(),
+    getIt<SaveUserProfileUseCase>(),
+  ));
+
+  // News Stores
+  getIt.registerFactory<AddNewsStore>(() => AddNewsStore());
+
+  // Обновленный NewsStore с параметрами
+  getIt.registerLazySingleton<NewsStore>(() => NewsStore(
+    getIt<GetNewsUseCase>(), // Первый параметр
+    getIt<SaveNewsUseCase>(), // Второй параметр
+  ));
+
+  // Schedule Stores
   getIt.registerLazySingleton<ScheduleStore>(() => ScheduleStore(
     getIt<GetScheduleUseCase>(),
     getIt<SaveScheduleUseCase>(),
   ));
+
   getIt.registerFactory<LessonEditStore>(() => LessonEditStore());
 
   // Other Stores

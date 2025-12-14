@@ -1,5 +1,5 @@
 import 'package:mobx/mobx.dart';
-import '../../../../Domain/entities/lesson.dart'; // Используйте entities/lesson
+import '../../../../Domain/entities/lesson.dart';
 import '../../../../Domain/usecases/get_schedule_usecase.dart';
 import '../../../../Domain/usecases/manage_lesson_usecase.dart';
 import '../../../../Domain/usecases/save_scgedule_usecase.dart';
@@ -53,6 +53,13 @@ abstract class ScheduleStoreBase with Store {
   }
 
   @action
+  void setDay(int day) { // или может быть setSelectedDay
+    if (day >= 0 && day <= 4) {
+      selectedDay = day;
+    }
+  }
+
+  @action
   Future<void> addLesson(Lesson lesson) async {
     isLoading = true;
 
@@ -60,18 +67,14 @@ abstract class ScheduleStoreBase with Store {
       final day = lesson.dayOfWeek.clamp(0, 4);
       final dayLessons = schedule[day] ?? [];
 
-      // Используем бизнес-логику из Domain
       if (ScheduleManager.hasTimeConflict(lesson, dayLessons)) {
         throw Exception('Урок пересекается по времени с существующим');
       }
 
-      // Обновляем локальное состояние
       final updatedLessons = [...dayLessons, lesson];
       schedule[day] = ScheduleManager.sortLessonsByTime(updatedLessons);
 
-      // Сохраняем через Use Case
       await _saveScheduleUseCase.execute(schedule);
-
       print('✅ Урок добавлен');
     } catch (e) {
       errorMessage = 'Ошибка добавления урока: $e';
@@ -90,21 +93,16 @@ abstract class ScheduleStoreBase with Store {
       final day = updatedLesson.dayOfWeek.clamp(0, 4);
       final dayLessons = schedule[day] ?? [];
 
-      // Удаляем старый урок
       final filteredLessons = dayLessons.where((l) => l.id != updatedLesson.id).toList();
 
-      // Проверяем конфликты
       if (ScheduleManager.hasTimeConflict(updatedLesson, filteredLessons)) {
         throw Exception('Обновленный урок пересекается по времени');
       }
 
-      // Добавляем обновленный
       final updatedLessons = [...filteredLessons, updatedLesson];
       schedule[day] = ScheduleManager.sortLessonsByTime(updatedLessons);
 
-      // Сохраняем
       await _saveScheduleUseCase.execute(schedule);
-
       print('✅ Урок обновлен');
     } catch (e) {
       errorMessage = 'Ошибка обновления урока: $e';
@@ -116,18 +114,15 @@ abstract class ScheduleStoreBase with Store {
   }
 
   @action
-  Future<void> deleteLesson(int lessonId) async { // Должно быть int
+  Future<void> deleteLesson(int lessonId) async {
     isLoading = true;
 
     try {
-      // Ищем и удаляем урок
       for (final day in schedule.keys) {
         schedule[day] = schedule[day]!.where((lesson) => lesson.id != lessonId).toList();
       }
 
-      // Сохраняем
       await _saveScheduleUseCase.execute(schedule);
-
       print('✅ Урок удален');
     } catch (e) {
       errorMessage = 'Ошибка удаления урока: $e';
@@ -139,8 +134,8 @@ abstract class ScheduleStoreBase with Store {
   }
 
   @action
-  void setDay(int day) { // переименовано с setSelectedDay на setDay
-    if (day >= 0 && day <= 4) { // упрощенная валидация
+  void setSelectedDay(int day) {
+    if (ScheduleManager.isValidDay(day)) {
       selectedDay = day;
     }
   }

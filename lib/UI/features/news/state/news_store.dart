@@ -1,20 +1,29 @@
 import 'package:mobx/mobx.dart';
-import '../../../../Data/datasources/repositories/school_repository.dart';
-import '../../../../Domain/models/news_item.dart';
+import '../../../../Domain/entities/news_item.dart';
+import '../../../../Domain/usecases/get_news_usecase.dart';
+import '../../../../Domain/usecases/save_news_usecase.dart';
 
 part 'news_store.g.dart';
 
 class NewsStore = NewsStoreBase with _$NewsStore;
 
 abstract class NewsStoreBase with Store {
-  final SchoolRepository _schoolRepository;
+  final GetNewsUseCase _getNewsUseCase;
+  final SaveNewsUseCase _saveNewsUseCase;
 
-  NewsStoreBase(this._schoolRepository) {
+  // Исправьте конструктор - добавьте второй параметр
+  NewsStoreBase(this._getNewsUseCase, this._saveNewsUseCase) {
     _loadNewsFromLocal();
   }
 
   @observable
   ObservableList<NewsItem> news = ObservableList.of([]);
+
+  @observable
+  bool isLoading = false;
+
+  @observable
+  String? errorMessage;
 
   // Методы только для управления списком новостей
   @action
@@ -23,7 +32,7 @@ abstract class NewsStoreBase with Store {
   }
 
   @action
-  void removeNews(String id) {
+  void removeNews(String id) { // String ID
     news.removeWhere((news) => news.id == id);
   }
 
@@ -34,61 +43,76 @@ abstract class NewsStoreBase with Store {
 
   @action
   Future<void> _loadNewsFromLocal() async {
+    isLoading = true;
     try {
-      // Загружаем новости из локального хранилища
-      final localNews = await _schoolRepository.getNews();
-
-      // Преобразуем NewsItem из domain/entities в NewsItem из Domain/models
-      news = ObservableList.of(localNews.map((item) => NewsItem(
-        id: item.id.toString(),
-        title: item.title,
-        content: item.content,
-        url: '',
-        date: item.date,
-      )).toList());
+      // Загружаем новости из локального хранилища через UseCase
+      final localNews = await _getNewsUseCase.execute();
+      news = ObservableList.of(localNews);
+      print('✅ Новости загружены: ${news.length} шт.');
     } catch (e) {
       // Если не удалось загрузить из локального хранилища, используем дефолтные новости
-      print('Ошибка при загрузке новостей: $e');
+      errorMessage = 'Ошибка при загрузке новостей: $e';
+      print('❌ $errorMessage');
       news = ObservableList.of([
         NewsItem(
-          id: '1',
+          id: '1', // String
           title: 'Важное объявление',
           content: 'Завтра собрание родителей в 18:00 в актовом зале.',
-          url: '',
           date: DateTime.now(),
+          url: '', // Добавьте
         ),
         NewsItem(
-          id: '2',
+          id: '2', // String
           title: 'Конкурс проектов',
           content: 'Принимаются заявки на школьный конкурс научных проектов до 25 числа.',
-          url: '',
           date: DateTime.now(),
+          url: '', // Добавьте
         ),
       ]);
+    } finally {
+      isLoading = false;
     }
   }
 
   @action
   Future<void> saveNewsToLocal() async {
+    isLoading = true;
     try {
-      // Преобразуем NewsItem из Domain/models в NewsItem из domain/entities
-      // и сохраняем в репозиторий школы
-
-      // Временная реализация - в реальном приложении нужно полное преобразование
-      print('Новости сохранены в локальное хранилище: ${news.length} новостей');
-
+      // Сохраняем новости через UseCase
+      await _saveNewsUseCase.execute(news.toList());
+      print('✅ Новости сохранены в локальное хранилище: ${news.length} новостей');
     } catch (e) {
-      // Обработка ошибок сохранения
-      print('Ошибка при сохранении новостей: $e');
+      errorMessage = 'Ошибка при сохранении новостей: $e';
+      print('❌ $errorMessage');
+      throw e;
+    } finally {
+      isLoading = false;
     }
   }
 
-  // Метод для получения новости по ID (если нужен)
-  NewsItem? getNewsById(String id) {
+  @action
+  Future<void> refreshNews() async {
+    await _loadNewsFromLocal();
+  }
+
+  // Метод для получения новости по ID
+  NewsItem? getNewsById(String id) { // String ID
     try {
       return news.firstWhere((news) => news.id == id);
     } catch (e) {
       return null;
     }
+  }
+
+  @computed
+  bool get hasNews => news.isNotEmpty;
+
+  @computed
+  int get newsCount => news.length;
+
+  @computed
+  List<NewsItem> get sortedNews {
+    return List.from(news)
+      ..sort((a, b) => b.date.compareTo(a.date)); // Сортировка по дате
   }
 }

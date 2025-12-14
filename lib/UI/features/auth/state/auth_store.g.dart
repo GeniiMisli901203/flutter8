@@ -23,6 +23,42 @@ mixin _$AuthStore on AuthStoreBase, Store {
     () => super.canRegister,
     name: 'AuthStoreBase.canRegister',
   )).value;
+  Computed<String?>? _$fullNameComputed;
+
+  @override
+  String? get fullName => (_$fullNameComputed ??= Computed<String?>(
+    () => super.fullName,
+    name: 'AuthStoreBase.fullName',
+  )).value;
+  Computed<String?>? _$emailComputed;
+
+  @override
+  String? get email => (_$emailComputed ??= Computed<String?>(
+    () => super.email,
+    name: 'AuthStoreBase.email',
+  )).value;
+  Computed<String?>? _$schoolComputed;
+
+  @override
+  String? get school => (_$schoolComputed ??= Computed<String?>(
+    () => super.school,
+    name: 'AuthStoreBase.school',
+  )).value;
+  Computed<bool>? _$isAuthenticatedComputed;
+
+  @override
+  bool get isAuthenticated => (_$isAuthenticatedComputed ??= Computed<bool>(
+    () => super.isAuthenticated,
+    name: 'AuthStoreBase.isAuthenticated',
+  )).value;
+  Computed<Map<String, String?>>? _$userInfoComputed;
+
+  @override
+  Map<String, String?> get userInfo =>
+      (_$userInfoComputed ??= Computed<Map<String, String?>>(
+        () => super.userInfo,
+        name: 'AuthStoreBase.userInfo',
+      )).value;
 
   late final _$isLoggedInAtom = Atom(
     name: 'AuthStoreBase.isLoggedIn',
@@ -335,6 +371,26 @@ mixin _$AuthStore on AuthStoreBase, Store {
     return _$getProfileStatsAsyncAction.run(() => super.getProfileStats());
   }
 
+  late final _$hasAuthTokenAsyncAction = AsyncAction(
+    'AuthStoreBase.hasAuthToken',
+    context: context,
+  );
+
+  @override
+  Future<bool> hasAuthToken() {
+    return _$hasAuthTokenAsyncAction.run(() => super.hasAuthToken());
+  }
+
+  late final _$getAuthTokenAsyncAction = AsyncAction(
+    'AuthStoreBase.getAuthToken',
+    context: context,
+  );
+
+  @override
+  Future<String?> getAuthToken() {
+    return _$getAuthTokenAsyncAction.run(() => super.getAuthToken());
+  }
+
   late final _$AuthStoreBaseActionController = ActionController(
     name: 'AuthStoreBase',
     context: context,
@@ -488,7 +544,12 @@ registerLogin: ${registerLogin},
 registerClassName: ${registerClassName},
 isLoading: ${isLoading},
 canLogin: ${canLogin},
-canRegister: ${canRegister}
+canRegister: ${canRegister},
+fullName: ${fullName},
+email: ${email},
+school: ${school},
+isAuthenticated: ${isAuthenticated},
+userInfo: ${userInfo}
     ''';
   }
 }

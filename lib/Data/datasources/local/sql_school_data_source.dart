@@ -43,7 +43,7 @@ class SqlSchoolDataSource implements SchoolDataSource {
     await db.execute('''
       CREATE TABLE $_lessonsTable (
         id INTEGER PRIMARY KEY,
-        subject TEXT,
+        title TEXT,
         teacher TEXT,
         room TEXT,
         startHour INTEGER,
@@ -105,7 +105,7 @@ class SqlSchoolDataSource implements SchoolDataSource {
     for (final lesson in lessons) {
       await db.insert(_lessonsTable, {
         'id': lesson.id,
-        'subject': lesson.title,
+        'title': lesson.title,
         'teacher': lesson.teacher,
         'room': lesson.room,
         'startHour': lesson.startTime.hour,
@@ -125,7 +125,7 @@ class SqlSchoolDataSource implements SchoolDataSource {
     return List.generate(maps.length, (i) {
       return Lesson(
         id: maps[i]['id'],
-        title: maps[i]['subject'],
+        title: maps[i]['title'],
         teacher: maps[i]['teacher'],
         room: maps[i]['room'],
         startTime: Time(

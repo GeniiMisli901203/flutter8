@@ -9,6 +9,29 @@ part of 'news_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$NewsStore on NewsStoreBase, Store {
+  Computed<bool>? _$hasNewsComputed;
+
+  @override
+  bool get hasNews => (_$hasNewsComputed ??= Computed<bool>(
+    () => super.hasNews,
+    name: 'NewsStoreBase.hasNews',
+  )).value;
+  Computed<int>? _$newsCountComputed;
+
+  @override
+  int get newsCount => (_$newsCountComputed ??= Computed<int>(
+    () => super.newsCount,
+    name: 'NewsStoreBase.newsCount',
+  )).value;
+  Computed<List<NewsItem>>? _$sortedNewsComputed;
+
+  @override
+  List<NewsItem> get sortedNews =>
+      (_$sortedNewsComputed ??= Computed<List<NewsItem>>(
+        () => super.sortedNews,
+        name: 'NewsStoreBase.sortedNews',
+      )).value;
+
   late final _$newsAtom = Atom(name: 'NewsStoreBase.news', context: context);
 
   @override
@@ -21,6 +44,42 @@ mixin _$NewsStore on NewsStoreBase, Store {
   set news(ObservableList<NewsItem> value) {
     _$newsAtom.reportWrite(value, super.news, () {
       super.news = value;
+    });
+  }
+
+  late final _$isLoadingAtom = Atom(
+    name: 'NewsStoreBase.isLoading',
+    context: context,
+  );
+
+  @override
+  bool get isLoading {
+    _$isLoadingAtom.reportRead();
+    return super.isLoading;
+  }
+
+  @override
+  set isLoading(bool value) {
+    _$isLoadingAtom.reportWrite(value, super.isLoading, () {
+      super.isLoading = value;
+    });
+  }
+
+  late final _$errorMessageAtom = Atom(
+    name: 'NewsStoreBase.errorMessage',
+    context: context,
+  );
+
+  @override
+  String? get errorMessage {
+    _$errorMessageAtom.reportRead();
+    return super.errorMessage;
+  }
+
+  @override
+  set errorMessage(String? value) {
+    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
+      super.errorMessage = value;
     });
   }
 
@@ -44,6 +103,16 @@ mixin _$NewsStore on NewsStoreBase, Store {
   @override
   Future<void> saveNewsToLocal() {
     return _$saveNewsToLocalAsyncAction.run(() => super.saveNewsToLocal());
+  }
+
+  late final _$refreshNewsAsyncAction = AsyncAction(
+    'NewsStoreBase.refreshNews',
+    context: context,
+  );
+
+  @override
+  Future<void> refreshNews() {
+    return _$refreshNewsAsyncAction.run(() => super.refreshNews());
   }
 
   late final _$NewsStoreBaseActionController = ActionController(
@@ -90,7 +159,12 @@ mixin _$NewsStore on NewsStoreBase, Store {
   @override
   String toString() {
     return '''
-news: ${news}
+news: ${news},
+isLoading: ${isLoading},
+errorMessage: ${errorMessage},
+hasNews: ${hasNews},
+newsCount: ${newsCount},
+sortedNews: ${sortedNews}
     ''';
   }
 }

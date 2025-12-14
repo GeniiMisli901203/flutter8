@@ -1,24 +1,20 @@
 import 'package:mobx/mobx.dart';
-import '../../../../Data/datasources/repositories/auth_repository.dart';
+import '../../../../Domain/interfaces/auth_datasource.dart'; // Добавьте этот импорт
 import '../../../../Domain/entities/user_profile.dart';
 import '../../../../Domain/usecases/get_user_profile_usecase.dart';
 import '../../../../Domain/usecases/save_user_profile_usecase.dart';
 
 part 'auth_store.g.dart';
 
-// Убираем старый класс User, используем UserProfile из domain
-// class User { ... } // Удаляем, используем UserProfile
-
 class AuthStore = AuthStoreBase with _$AuthStore;
 
 abstract class AuthStoreBase with Store {
-  final AuthRepository _authRepository;
+  final AuthDataSource _authDataSource; // Используем DataSource напрямую
   final SaveUserProfileUseCase _saveUserProfileUseCase;
   final GetUserProfileUseCase _getUserProfileUseCase;
 
-  // Конструктор принимает Use Cases вместо репозиториев
   AuthStoreBase(
-      this._authRepository,
+      this._authDataSource,
       this._saveUserProfileUseCase,
       this._getUserProfileUseCase,
       ) {
@@ -29,7 +25,7 @@ abstract class AuthStoreBase with Store {
   bool isLoggedIn = false;
 
   @observable
-  UserProfile? currentUser; // Используем UserProfile вместо User
+  UserProfile? currentUser;
 
   @observable
   String login = '';
@@ -108,7 +104,7 @@ abstract class AuthStoreBase with Store {
   @action
   Future<void> _checkLoginStatus() async {
     try {
-      final token = await _authRepository.getLoginInfo();
+      final token = await _authDataSource.getLoginInfo(); // Изменено
       if (token != null && token.isNotEmpty) {
         isLoggedIn = true;
         await _loadUserProfile();
@@ -144,7 +140,7 @@ abstract class AuthStoreBase with Store {
       await Future.delayed(const Duration(seconds: 1));
 
       // Сохраняем токен авторизации
-      await _authRepository.saveLoginInfo('auth_token_${DateTime.now().millisecondsSinceEpoch}');
+      await _authDataSource.saveLoginInfo('auth_token_${DateTime.now().millisecondsSinceEpoch}'); // Изменено
 
       // Создаем и сохраняем профиль пользователя через Use Case
       final userProfile = UserProfile(
@@ -183,7 +179,7 @@ abstract class AuthStoreBase with Store {
       await Future.delayed(const Duration(seconds: 1));
 
       // Сохраняем токен авторизации
-      await _authRepository.saveLoginInfo('auth_token_${DateTime.now().millisecondsSinceEpoch}');
+      await _authDataSource.saveLoginInfo('auth_token_${DateTime.now().millisecondsSinceEpoch}'); // Изменено
 
       // Создаем и сохраняем профиль пользователя через Use Case
       final userProfile = UserProfile(
@@ -241,7 +237,7 @@ abstract class AuthStoreBase with Store {
       _clearRegistrationForm();
 
       // Очищаем токен авторизации
-      await _authRepository.clearLoginInfo();
+      await _authDataSource.clearLoginInfo(); // Изменено
 
       print('✅ Пользователь вышел из системы');
       print('   Токен удален');
@@ -300,6 +296,11 @@ abstract class AuthStoreBase with Store {
     try {
       final profile = await _getUserProfileUseCase.execute();
 
+      // Проверяем на null перед доступом к полям
+      if (profile == null) {
+        return false;
+      }
+
       return profile.firstName.isNotEmpty &&
           profile.lastName.isNotEmpty &&
           profile.email.isNotEmpty &&
@@ -319,6 +320,20 @@ abstract class AuthStoreBase with Store {
     try {
       final profile = await _getUserProfileUseCase.execute();
 
+      // Проверяем на null
+      if (profile == null) {
+        return {
+          'hasFirstName': false,
+          'hasLastName': false,
+          'hasEmail': false,
+          'hasPhone': false,
+          'hasSchool': false,
+          'hasClassName': false,
+          'hasLogin': false,
+          'isComplete': false,
+        };
+      }
+
       return {
         'hasFirstName': profile.firstName.isNotEmpty,
         'hasLastName': profile.lastName.isNotEmpty,
@@ -332,6 +347,66 @@ abstract class AuthStoreBase with Store {
     } catch (e) {
       print('❌ Ошибка при получении статистики профиля: $e');
       return {};
+    }
+  }
+
+  // Новый метод для безопасного получения полного имени
+  @computed
+  String? get fullName {
+    return currentUser?.fullName;
+  }
+
+  // Новый метод для получения email безопасно
+  @computed
+  String? get email {
+    return currentUser?.email;
+  }
+
+  // Новый метод для получения школы безопасно
+  @computed
+  String? get school {
+    return currentUser?.school;
+  }
+
+  // Метод для проверки, авторизован ли пользователь
+  @computed
+  bool get isAuthenticated => isLoggedIn && currentUser != null;
+
+  // Метод для получения краткой информации о пользователе
+  @computed
+  Map<String, String?> get userInfo {
+    if (currentUser == null) {
+      return {};
+    }
+
+    return {
+      'fullName': currentUser!.fullName,
+      'email': currentUser!.email,
+      'school': currentUser!.school,
+      'className': currentUser!.className,
+    };
+  }
+
+  // Новый метод для проверки наличия токена
+  @action
+  Future<bool> hasAuthToken() async {
+    try {
+      final token = await _authDataSource.getLoginInfo();
+      return token != null && token.isNotEmpty;
+    } catch (e) {
+      print('❌ Ошибка при проверке токена: $e');
+      return false;
+    }
+  }
+
+  // Новый метод для получения токена
+  @action
+  Future<String?> getAuthToken() async {
+    try {
+      return await _authDataSource.getLoginInfo();
+    } catch (e) {
+      print('❌ Ошибка при получении токена: $e');
+      return null;
     }
   }
 }

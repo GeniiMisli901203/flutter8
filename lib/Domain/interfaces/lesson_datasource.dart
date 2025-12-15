@@ -1,4 +1,4 @@
-import '../models/lesson.dart';
+import '../entities/lesson.dart';
 
 abstract class LessonDataSource {
   Future<Lesson> getLesson(String lessonId);

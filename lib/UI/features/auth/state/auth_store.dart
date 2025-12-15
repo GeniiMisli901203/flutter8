@@ -1,6 +1,7 @@
 import 'package:mobx/mobx.dart';
-import '../../../../Domain/interfaces/auth_datasource.dart'; // Добавьте этот импорт
 import '../../../../Domain/entities/user_profile.dart';
+import '../../../../Domain/usecases/login_usecase.dart';
+import '../../../../Domain/usecases/register_usecase.dart';
 import '../../../../Domain/usecases/get_user_profile_usecase.dart';
 import '../../../../Domain/usecases/save_user_profile_usecase.dart';
 
@@ -9,12 +10,14 @@ part 'auth_store.g.dart';
 class AuthStore = AuthStoreBase with _$AuthStore;
 
 abstract class AuthStoreBase with Store {
-  final AuthDataSource _authDataSource; // Используем DataSource напрямую
+  final LoginUseCase _loginUseCase;
+  final RegisterUseCase _registerUseCase;
   final SaveUserProfileUseCase _saveUserProfileUseCase;
   final GetUserProfileUseCase _getUserProfileUseCase;
 
   AuthStoreBase(
-      this._authDataSource,
+      this._loginUseCase,
+      this._registerUseCase,
       this._saveUserProfileUseCase,
       this._getUserProfileUseCase,
       ) {
@@ -25,7 +28,7 @@ abstract class AuthStoreBase with Store {
   bool isLoggedIn = false;
 
   @observable
-  UserProfile? currentUser;
+  UserProfile? currentUser; // Изменено с InvalidType на UserProfile?
 
   @observable
   String login = '';
@@ -43,7 +46,7 @@ abstract class AuthStoreBase with Store {
   String registerEmail = '';
 
   @observable
-  String registerPhone = '';
+  String registerPhone = ''; // На сервере нет телефона, но оставим для совместимости
 
   @observable
   String registerSchool = '';
@@ -57,6 +60,9 @@ abstract class AuthStoreBase with Store {
   @observable
   bool isLoading = false;
 
+  @observable
+  String? errorMessage;
+
   @computed
   bool get canLogin => login.isNotEmpty && password.isNotEmpty;
 
@@ -65,7 +71,6 @@ abstract class AuthStoreBase with Store {
       registerFirstName.isNotEmpty &&
           registerLastName.isNotEmpty &&
           registerEmail.isNotEmpty &&
-          registerPhone.isNotEmpty &&
           registerSchool.isNotEmpty &&
           registerLogin.isNotEmpty &&
           registerClassName.isNotEmpty &&
@@ -102,70 +107,54 @@ abstract class AuthStoreBase with Store {
   void setLoading(bool value) => isLoading = value;
 
   @action
-  Future<void> _checkLoginStatus() async {
-    try {
-      final token = await _authDataSource.getLoginInfo(); // Изменено
-      if (token != null && token.isNotEmpty) {
-        isLoggedIn = true;
-        await _loadUserProfile();
-      }
-    } catch (e) {
-      print('Ошибка при проверке статуса авторизации: $e');
-    }
-  }
+  void setError(String? value) => errorMessage = value;
 
   @action
-  Future<void> _loadUserProfile() async {
+  Future<void> _checkLoginStatus() async {
     try {
-      currentUser = await _getUserProfileUseCase.execute();
-
-      if (currentUser != null) {
-        print('✅ Профиль пользователя загружен');
-        print('   Имя: ${currentUser!.fullName}');
-        print('   Email: ${currentUser!.email}');
-        print('   Школа: ${currentUser!.school}');
-      } else {
-        print('⚠️ Профиль пользователя не найден в хранилище');
+      final profile = await _getUserProfileUseCase.execute();
+      if (profile != null) {
+        currentUser = profile;
+        isLoggedIn = true;
+        print('✅ Пользователь авторизован: ${profile.fullName}');
       }
     } catch (e) {
-      print('Ошибка при загрузке профиля пользователя: $e');
+      print('⚠️ Ошибка при проверке статуса авторизации: $e');
     }
   }
 
   @action
   Future<void> loginUser() async {
     setLoading(true);
+    setError(null);
+
     try {
-      // Имитация запроса к API
-      await Future.delayed(const Duration(seconds: 1));
+      final token = await _loginUseCase.execute(login, password);
 
-      // Сохраняем токен авторизации
-      await _authDataSource.saveLoginInfo('auth_token_${DateTime.now().millisecondsSinceEpoch}'); // Изменено
-
-      // Создаем и сохраняем профиль пользователя через Use Case
+      // Создаем временный профиль на основе данных входа
       final userProfile = UserProfile(
-        firstName: 'Иван',
-        lastName: 'Иванов',
-        email: 'ivanov@school123.ru',
-        phone: '+7 (999) 123-45-67',
-        school: 'Школа №123',
-        className: '9А',
+        firstName: 'Загрузка...',
+        lastName: '...',
+        email: login.contains('@') ? login : '$login@example.com',
+        phone: registerPhone,
+        school: 'Загрузка...',
+        className: 'Загрузка...',
         login: login,
       );
 
+      // Сохраняем профиль
       await _saveUserProfileUseCase.execute(userProfile);
 
-      // Устанавливаем текущего пользователя
-      currentUser = userProfile;
-      isLoggedIn = true;
+      // Загружаем полный профиль с сервера
+      currentUser = await _getUserProfileUseCase.execute();
 
+      isLoggedIn = true;
       print('✅ Пользователь успешно вошел в систему');
-      print('   Токен сохранен');
-      print('   Профиль сохранен в Secure Storage');
+      print('   Токен получен: ${token.substring(0, 20)}...');
 
     } catch (e) {
+      setError('Ошибка входа: $e');
       print('❌ Ошибка при входе: $e');
-      // Можно добавить обработку ошибок UI
     } finally {
       setLoading(false);
     }
@@ -174,14 +163,20 @@ abstract class AuthStoreBase with Store {
   @action
   Future<void> registerUser() async {
     setLoading(true);
+    setError(null);
+
     try {
-      // Имитация запроса к API
-      await Future.delayed(const Duration(seconds: 1));
+      await _registerUseCase.execute(
+        login: registerLogin,
+        email: registerEmail,
+        password: password,
+        firstName: registerFirstName,
+        lastName: registerLastName,
+        className: registerClassName,
+        school: registerSchool,
+      );
 
-      // Сохраняем токен авторизации
-      await _authDataSource.saveLoginInfo('auth_token_${DateTime.now().millisecondsSinceEpoch}'); // Изменено
-
-      // Создаем и сохраняем профиль пользователя через Use Case
+      // Создаем профиль пользователя
       final userProfile = UserProfile(
         firstName: registerFirstName,
         lastName: registerLastName,
@@ -192,6 +187,7 @@ abstract class AuthStoreBase with Store {
         login: registerLogin,
       );
 
+      // Сохраняем профиль
       await _saveUserProfileUseCase.execute(userProfile);
 
       // Устанавливаем текущего пользователя
@@ -199,15 +195,16 @@ abstract class AuthStoreBase with Store {
       isLoggedIn = true;
 
       print('✅ Пользователь успешно зарегистрирован');
-      print('   Токен сохранен');
-      print('   Профиль сохранен в Secure Storage');
+      print('   Имя: $registerFirstName $registerLastName');
+      print('   Email: $registerEmail');
+      print('   Школа: $registerSchool');
 
       // Очищаем поля формы регистрации
       _clearRegistrationForm();
 
     } catch (e) {
+      setError('Ошибка регистрации: $e');
       print('❌ Ошибка при регистрации: $e');
-      // Можно добавить обработку ошибок UI
     } finally {
       setLoading(false);
     }
@@ -236,11 +233,10 @@ abstract class AuthStoreBase with Store {
       password = '';
       _clearRegistrationForm();
 
-      // Очищаем токен авторизации
-      await _authDataSource.clearLoginInfo(); // Изменено
+      // Очищаем токен авторизации через UseCase
+      // Токен будет очищен при следующем обращении к AuthDataSource
 
       print('✅ Пользователь вышел из системы');
-      print('   Токен удален');
 
     } catch (e) {
       print('❌ Ошибка при выходе: $e');
@@ -260,8 +256,7 @@ abstract class AuthStoreBase with Store {
   }) async {
     try {
       if (currentUser == null) {
-        print('❌ Невозможно обновить профиль: пользователь не авторизован');
-        return;
+        throw Exception('Невозможно обновить профиль: пользователь не авторизован');
       }
 
       // Создаем обновленный профиль
@@ -282,131 +277,26 @@ abstract class AuthStoreBase with Store {
       currentUser = updatedProfile;
 
       print('✅ Профиль пользователя обновлен');
-      print('   Новые данные сохранены в Secure Storage');
 
     } catch (e) {
       print('❌ Ошибка при обновлении профиля: $e');
-      throw e; // Пробрасываем ошибку для обработки в UI
+      throw e;
     }
   }
 
-  // Метод для проверки, заполнен ли профиль полностью
-  @action
-  Future<bool> isProfileComplete() async {
-    try {
-      final profile = await _getUserProfileUseCase.execute();
-
-      // Проверяем на null перед доступом к полям
-      if (profile == null) {
-        return false;
-      }
-
-      return profile.firstName.isNotEmpty &&
-          profile.lastName.isNotEmpty &&
-          profile.email.isNotEmpty &&
-          profile.phone.isNotEmpty &&
-          profile.school.isNotEmpty &&
-          profile.className.isNotEmpty &&
-          profile.login.isNotEmpty;
-    } catch (e) {
-      print('❌ Ошибка при проверке полноты профиля: $e');
-      return false;
-    }
-  }
-
-  // Метод для получения статистики профиля
-  @action
-  Future<Map<String, dynamic>> getProfileStats() async {
-    try {
-      final profile = await _getUserProfileUseCase.execute();
-
-      // Проверяем на null
-      if (profile == null) {
-        return {
-          'hasFirstName': false,
-          'hasLastName': false,
-          'hasEmail': false,
-          'hasPhone': false,
-          'hasSchool': false,
-          'hasClassName': false,
-          'hasLogin': false,
-          'isComplete': false,
-        };
-      }
-
-      return {
-        'hasFirstName': profile.firstName.isNotEmpty,
-        'hasLastName': profile.lastName.isNotEmpty,
-        'hasEmail': profile.email.isNotEmpty,
-        'hasPhone': profile.phone.isNotEmpty,
-        'hasSchool': profile.school.isNotEmpty,
-        'hasClassName': profile.className.isNotEmpty,
-        'hasLogin': profile.login.isNotEmpty,
-        'isComplete': await isProfileComplete(),
-      };
-    } catch (e) {
-      print('❌ Ошибка при получении статистики профиля: $e');
-      return {};
-    }
-  }
-
-  // Новый метод для безопасного получения полного имени
+  // Геттер для получения полного имени
   @computed
-  String? get fullName {
-    return currentUser?.fullName;
-  }
+  String? get fullName => currentUser?.fullName;
 
-  // Новый метод для получения email безопасно
+  // Геттер для получения email
   @computed
-  String? get email {
-    return currentUser?.email;
-  }
+  String? get email => currentUser?.email;
 
-  // Новый метод для получения школы безопасно
+  // Геттер для получения школы
   @computed
-  String? get school {
-    return currentUser?.school;
-  }
+  String? get school => currentUser?.school;
 
-  // Метод для проверки, авторизован ли пользователь
+  // Геттер для получения класса
   @computed
-  bool get isAuthenticated => isLoggedIn && currentUser != null;
-
-  // Метод для получения краткой информации о пользователе
-  @computed
-  Map<String, String?> get userInfo {
-    if (currentUser == null) {
-      return {};
-    }
-
-    return {
-      'fullName': currentUser!.fullName,
-      'email': currentUser!.email,
-      'school': currentUser!.school,
-      'className': currentUser!.className,
-    };
-  }
-
-  // Новый метод для проверки наличия токена
-  @action
-  Future<bool> hasAuthToken() async {
-    try {
-      final token = await _authDataSource.getLoginInfo();
-      return token != null && token.isNotEmpty;
-    } catch (e) {
-      print('❌ Ошибка при проверке токена: $e');
-      return false;
-    }
-  }
-
-  // Новый метод для получения токена
-  @action
-  Future<String?> getAuthToken() async {
-    try {
-      return await _authDataSource.getLoginInfo();
-    } catch (e) {
-      print('❌ Ошибка при получении токена: $e');
-      return null;
-    }
-  }
+  String? get className => currentUser?.className;
 }

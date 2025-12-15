@@ -44,21 +44,13 @@ mixin _$AuthStore on AuthStoreBase, Store {
     () => super.school,
     name: 'AuthStoreBase.school',
   )).value;
-  Computed<bool>? _$isAuthenticatedComputed;
+  Computed<String?>? _$classNameComputed;
 
   @override
-  bool get isAuthenticated => (_$isAuthenticatedComputed ??= Computed<bool>(
-    () => super.isAuthenticated,
-    name: 'AuthStoreBase.isAuthenticated',
+  String? get className => (_$classNameComputed ??= Computed<String?>(
+    () => super.className,
+    name: 'AuthStoreBase.className',
   )).value;
-  Computed<Map<String, String?>>? _$userInfoComputed;
-
-  @override
-  Map<String, String?> get userInfo =>
-      (_$userInfoComputed ??= Computed<Map<String, String?>>(
-        () => super.userInfo,
-        name: 'AuthStoreBase.userInfo',
-      )).value;
 
   late final _$isLoggedInAtom = Atom(
     name: 'AuthStoreBase.isLoggedIn',
@@ -273,6 +265,24 @@ mixin _$AuthStore on AuthStoreBase, Store {
     });
   }
 
+  late final _$errorMessageAtom = Atom(
+    name: 'AuthStoreBase.errorMessage',
+    context: context,
+  );
+
+  @override
+  String? get errorMessage {
+    _$errorMessageAtom.reportRead();
+    return super.errorMessage;
+  }
+
+  @override
+  set errorMessage(String? value) {
+    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
+      super.errorMessage = value;
+    });
+  }
+
   late final _$_checkLoginStatusAsyncAction = AsyncAction(
     'AuthStoreBase._checkLoginStatus',
     context: context,
@@ -281,16 +291,6 @@ mixin _$AuthStore on AuthStoreBase, Store {
   @override
   Future<void> _checkLoginStatus() {
     return _$_checkLoginStatusAsyncAction.run(() => super._checkLoginStatus());
-  }
-
-  late final _$_loadUserProfileAsyncAction = AsyncAction(
-    'AuthStoreBase._loadUserProfile',
-    context: context,
-  );
-
-  @override
-  Future<void> _loadUserProfile() {
-    return _$_loadUserProfileAsyncAction.run(() => super._loadUserProfile());
   }
 
   late final _$loginUserAsyncAction = AsyncAction(
@@ -349,46 +349,6 @@ mixin _$AuthStore on AuthStoreBase, Store {
         login: login,
       ),
     );
-  }
-
-  late final _$isProfileCompleteAsyncAction = AsyncAction(
-    'AuthStoreBase.isProfileComplete',
-    context: context,
-  );
-
-  @override
-  Future<bool> isProfileComplete() {
-    return _$isProfileCompleteAsyncAction.run(() => super.isProfileComplete());
-  }
-
-  late final _$getProfileStatsAsyncAction = AsyncAction(
-    'AuthStoreBase.getProfileStats',
-    context: context,
-  );
-
-  @override
-  Future<Map<String, dynamic>> getProfileStats() {
-    return _$getProfileStatsAsyncAction.run(() => super.getProfileStats());
-  }
-
-  late final _$hasAuthTokenAsyncAction = AsyncAction(
-    'AuthStoreBase.hasAuthToken',
-    context: context,
-  );
-
-  @override
-  Future<bool> hasAuthToken() {
-    return _$hasAuthTokenAsyncAction.run(() => super.hasAuthToken());
-  }
-
-  late final _$getAuthTokenAsyncAction = AsyncAction(
-    'AuthStoreBase.getAuthToken',
-    context: context,
-  );
-
-  @override
-  Future<String?> getAuthToken() {
-    return _$getAuthTokenAsyncAction.run(() => super.getAuthToken());
   }
 
   late final _$AuthStoreBaseActionController = ActionController(
@@ -517,6 +477,18 @@ mixin _$AuthStore on AuthStoreBase, Store {
   }
 
   @override
+  void setError(String? value) {
+    final _$actionInfo = _$AuthStoreBaseActionController.startAction(
+      name: 'AuthStoreBase.setError',
+    );
+    try {
+      return super.setError(value);
+    } finally {
+      _$AuthStoreBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void _clearRegistrationForm() {
     final _$actionInfo = _$AuthStoreBaseActionController.startAction(
       name: 'AuthStoreBase._clearRegistrationForm',
@@ -543,13 +515,13 @@ registerSchool: ${registerSchool},
 registerLogin: ${registerLogin},
 registerClassName: ${registerClassName},
 isLoading: ${isLoading},
+errorMessage: ${errorMessage},
 canLogin: ${canLogin},
 canRegister: ${canRegister},
 fullName: ${fullName},
 email: ${email},
 school: ${school},
-isAuthenticated: ${isAuthenticated},
-userInfo: ${userInfo}
+className: ${className}
     ''';
   }
 }

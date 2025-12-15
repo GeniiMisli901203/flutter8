@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../Domain/models/lesson.dart';
+import '../../../../Domain/entities/lesson.dart';
+
 
 class AnimatedLessonCard extends StatelessWidget {
   final Lesson lesson;

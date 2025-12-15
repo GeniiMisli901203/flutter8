@@ -1,4 +1,4 @@
-import '../models/lesson.dart';
+import '../entities/lesson.dart';
 import '../interfaces/lesson_datasource.dart';
 
 abstract class GetAllLessonsUseCase {

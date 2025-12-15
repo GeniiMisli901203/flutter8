@@ -2,7 +2,7 @@ import 'package:mobx/mobx.dart';
 import '../../../../Domain/entities/lesson.dart';
 import '../../../../Domain/usecases/get_schedule_usecase.dart';
 import '../../../../Domain/usecases/manage_lesson_usecase.dart';
-import '../../../../Domain/usecases/save_scgedule_usecase.dart';
+import '../../../../Domain/usecases/save_schedule_usecase.dart';
 
 
 part 'schedule_store.g.dart';

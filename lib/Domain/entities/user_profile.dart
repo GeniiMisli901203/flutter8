@@ -1,4 +1,6 @@
-// domain/entities/user_profile.dart
+
+import '../../Data/datasources/remote/dto/api/user_dto.dart';
+
 class UserProfile {
   final String firstName;
   final String lastName;
@@ -50,6 +52,17 @@ class UserProfile {
       'className': className,
       'login': login,
     };
+  }
+
+  // Исправленный метод - используйте UpdateUserRequestDTO, а не UserUpdateRequestDTO
+  // И преобразуйте поля firstName/lastName в name/sName
+  UpdateUserRequestDTO toUpdateDTO() {
+    return UpdateUserRequestDTO(
+      name: firstName,
+      sName: lastName,
+      uClass: className,
+      school: school,
+    );
   }
 
   factory UserProfile.fromMap(Map<String, String> map) {
